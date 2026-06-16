@@ -451,8 +451,8 @@
                     const lng = parseFloat(this.slope.longtitude);
                     
                     if (isNaN(lat) || isNaN(lng)) {
-                        // Default Bawen coordinates
-                        this.map = L.map('map').setView([-7.2, 110.4], 10);
+                        // Default Semarang ABC coordinates
+                        this.map = L.map('map').setView([-7.02, 110.41], 13);
                     } else {
                         this.map = L.map('map').setView([lat, lng], 14);
                         L.marker([lat, lng]).addTo(this.map)
