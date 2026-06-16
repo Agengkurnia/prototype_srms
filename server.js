@@ -6,17 +6,37 @@ const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_PATH = path.join(__dirname, 'db.json');
-const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
 
-// Ensure upload directory exists
+// Vercel Compatibility Settings
+const isVercel = !!process.env.VERCEL;
+const DB_PATH = isVercel ? path.join('/tmp', 'db.json') : path.join(__dirname, 'db.json');
+const UPLOAD_DIR = isVercel ? path.join('/tmp', 'uploads') : path.join(__dirname, 'public', 'uploads');
+
+// Initialize DB and Upload Dir for Vercel / Local
+if (isVercel) {
+  if (!fs.existsSync(DB_PATH)) {
+    const srcDB = path.join(__dirname, 'db.json');
+    if (fs.existsSync(srcDB)) {
+      fs.copyFileSync(srcDB, DB_PATH);
+    } else {
+      fs.writeFileSync(DB_PATH, JSON.stringify({ slopes: [], records: [], inspections: [], maintenances: [], preservations: [], mitigations: [] }), 'utf8');
+    }
+  }
+}
+
+// Ensure upload directory exists (will succeed in /tmp or local)
 if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  try {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  } catch (e) {
+    console.error("Failed to create upload directory:", e);
+  }
 }
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -661,9 +681,13 @@ app.delete('/api/mitigations/:id', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`  LHMS/SRMS STANDALONE CRUD PROTOTYPE RUNNING          `);
-  console.log(`  Access URL: http://localhost:${PORT}                 `);
-  console.log(`=======================================================`);
-});
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`  LHMS/SRMS STANDALONE CRUD PROTOTYPE RUNNING          `);
+    console.log(`  Access URL: http://localhost:${PORT}                 `);
+    console.log(`=======================================================`);
+  });
+}
+
+module.exports = app;
