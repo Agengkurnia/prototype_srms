@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Failure Incident | Slope Risk Management System</title>
+    <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Figtree', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-stone-100 font-sans antialiased text-gray-900 pb-28" x-data="recordHandler()" x-init="init()">
+
+    <!-- Header Navigation -->
+    <nav class="relative z-40 w-full bg-white shadow-sm border-b border-gray-100">
+        <div class="flex justify-between items-center mx-auto py-3.5 px-6 max-w-7xl">
+            <div class="flex items-center">
+                <img src="components/icons/icon-srms.svg" class="w-8 mr-2.5" alt="Logo">
+                <p class="font-black text-sm uppercase leading-tight tracking-wider text-gray-800">
+                    Slope Risk<br><span class="text-lime-600">Management System</span>
+                </p>
+            </div>
+            <a :href="'detail.html?slug=' + slug" class="text-sm font-bold text-gray-500 hover:text-gray-700">Cancel & Exit</a>
+        </div>
+    </nav>
+
+    <!-- Content Area -->
+    <div class="max-w-4xl mx-auto px-6 py-6" x-show="!loading">
+        <!-- Breadcrumb row -->
+        <div class="flex justify-between items-center mb-6 py-3 px-6 bg-white border border-gray-200 shadow-sm rounded-2xl">
+            <span class="text-sm font-semibold text-gray-600">Landslide / Slope Failure Incident Form</span>
+            <span class="text-xs bg-red-100 text-red-800 font-bold px-2.5 py-0.5 rounded-full uppercase" x-text="slope.slope_name"></span>
+        </div>
+
+        <form @submit.prevent="submitForm()" class="space-y-6">
+            
+            <!-- SECTION 1: FAILURE DETAILS -->
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-8 space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">1. Failure Details & Dimensions</h3>
+                    <p class="text-gray-500 text-sm mt-1">Specify failure type, date of occurrence, and landslide slide dimensions.</p>
+                </div>
+                <div class="border-t border-gray-100"></div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Type of Failure *</label>
+                        <select x-model="record.type_of_failure" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                            <option value="Soil Slip">Soil Slip / Shallow Slide</option>
+                            <option value="Rock Fall">Rock Fall / Toppling</option>
+                            <option value="Debris Flow">Debris Flow</option>
+                            <option value="Settlement">Embankment Settlement</option>
+                            <option value="Wall Collapse">Retaining Wall Collapse</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Date of Occurrence *</label>
+                        <input type="date" x-model="record.date_of_occurrence" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Time of Occurrence</label>
+                        <input type="time" x-model="record.time_of_occurrence" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Failure Length (m)</label>
+                        <input type="number" step="0.1" x-model.number="record.length_of_slope_failure" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Failure Height (m)</label>
+                        <input type="number" step="0.1" x-model.number="record.height_of_slope_failure" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Debris Volume (m³)</label>
+                        <input type="number" step="0.1" x-model.number="record.volume_of_fallen_debris_rocks" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: CONSEQUENCES & TRAFFIC -->
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-8 space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">2. Operational Consequences & Casualties</h3>
+                    <p class="text-gray-500 text-sm mt-1">Specify traffic blockade details, casualties, and operation scope.</p>
+                </div>
+                <div class="border-t border-gray-100"></div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Traffic Blockade Status</label>
+                        <select x-model="record.traffic_blockade" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                            <option value="None">None / Open</option>
+                            <option value="One Lane Closed">One Lane Closed</option>
+                            <option value="Multi Lane Closed">Multiple Lanes Closed</option>
+                            <option value="Full Road Closure">Full Road Closure</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Blockade Duration</label>
+                        <input type="text" x-model="record.traffic_blockade_duration" placeholder="e.g. 4 Hours, 1 Day" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Injuries or Deaths</label>
+                        <input type="number" x-model.number="record.death_or_injury" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Scope of Work Operation</label>
+                        <input type="text" x-model="record.scope_of_operation" placeholder="e.g. Debris cleaning, rock bolt repair" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: RAINFALL RECORD -->
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-8 space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">3. Associated Rainfall Records</h3>
+                    <p class="text-gray-500 text-sm mt-1">Provide meteorological details logged at the nearest monitoring station.</p>
+                </div>
+                <div class="border-t border-gray-100"></div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">24-Hour Rainfall (mm)</label>
+                        <input type="number" step="0.1" x-model.number="record.rainfall_24_hours" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Peak Hourly Rainfall (mm)</label>
+                        <input type="number" step="0.1" x-model.number="record.maximum_hourly_rainfall" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Preceding 3 Days Total (mm)</label>
+                        <input type="number" step="0.1" x-model.number="record.total_rainfall_proceeding_3_days" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Rainfall Station Source</label>
+                        <input type="text" x-model="record.data_source" placeholder="e.g. AWS Bawen Sta-02" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: PAVEMENT CRACKS & DISTRESS -->
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-8 space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">4. Roadway Pavement Distress</h3>
+                    <p class="text-gray-500 text-sm mt-1">Specify cracking and pavement depression observations at the toe area.</p>
+                </div>
+                <div class="border-t border-gray-100"></div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Pavement Cracks Present?</label>
+                        <select x-model="record.pavement_cracks" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Pavement Cracks Cause</label>
+                        <input type="text" x-model="record.cause_of_cracks" placeholder="e.g. lateral displacement" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Cracks Sealed?</label>
+                        <select x-model="record.cracks_sealed" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Pavement Depression / Settlement</label>
+                        <input type="text" x-model="record.pavement_depression" placeholder="e.g. 5cm settlement" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sticky Bottom Buttons Bar -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-between items-center shadow-2xl z-40">
+                <a :href="'detail.html?slug=' + slug" class="text-gray-500 hover:text-gray-800 font-bold text-sm">← Cancel</a>
+                <button type="submit" class="bg-lime-600 hover:bg-lime-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-lg hover:shadow-lime-600/30">
+                    Save Failure Record
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="flex items-center justify-center min-h-[80vh]" x-show="loading">
+        <div class="text-center space-y-3">
+            <div class="w-12 h-12 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-gray-500 font-semibold text-sm">Loading config parameters...</p>
+        </div>
+    </div>
+
+    <script>
+        function recordHandler() {
+            return {
+                loading: true,
+                slug: '',
+                slope: {},
+                record: {
+                    type_of_failure: 'Soil Slip',
+                    date_of_occurrence: '',
+                    time_of_occurrence: '',
+                    length_of_slope_failure: 0,
+                    height_of_slope_failure: 0,
+                    volume_of_fallen_debris_rocks: 0,
+                    type_of_damage: '',
+                    death_or_injury: 0,
+                    scope_of_operation: '',
+                    traffic_blockade: 'None',
+                    traffic_blockade_duration: '',
+                    rainfall_24_hours: 0,
+                    maximum_hourly_rainfall: 0,
+                    total_rainfall_proceeding_3_days: 0,
+                    data_source: '',
+                    pavement_cracks: 'No',
+                    cause_of_cracks: '',
+                    cracks_sealed: 'No',
+                    pavement_depression: ''
+                },
+
+                init() {
+                    const params = new URLSearchParams(window.location.search);
+                    this.slug = params.get('slug') || '';
+                    if (!this.slug) {
+                        window.location.href = 'inventory.html';
+                        return;
+                    }
+                    this.fetchDetails();
+                },
+
+                fetchDetails() {
+                    this.loading = true;
+                    fetch(`/api/slopes/${this.slug}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            this.slope = data.slope;
+                            this.loading = false;
+                        })
+                        .catch(err => {
+                            console.error('Error fetching details:', err);
+                            this.loading = false;
+                        });
+                },
+
+                submitForm() {
+                    fetch(`/api/slopes/${this.slug}/records`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.record)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = `detail.html?slug=${this.slug}`;
+                        }
+                    })
+                    .catch(err => console.error('Error saving record:', err));
+                }
+            }
+        }
+    </script>
+</body>
+</html>

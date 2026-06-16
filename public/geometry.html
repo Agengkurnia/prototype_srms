@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 1: Geometry Setup | Slope Risk Management System</title>
+    <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Figtree', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-stone-100 font-sans antialiased text-gray-900 pb-28" x-data="geometryHandler()" x-init="init()">
+
+    <!-- Header Navigation -->
+    <nav class="relative z-40 w-full bg-white shadow-sm border-b border-gray-100">
+        <div class="flex justify-between items-center mx-auto py-3.5 px-6 max-w-7xl">
+            <div class="flex items-center">
+                <img src="components/icons/icon-srms.svg" class="w-8 mr-2.5" alt="Logo">
+                <p class="font-black text-sm uppercase leading-tight tracking-wider text-gray-800">
+                    Slope Risk<br><span class="text-lime-600">Management System</span>
+                </p>
+            </div>
+            <a href="inventory.html" class="text-sm font-bold text-gray-500 hover:text-gray-700">Cancel & Exit</a>
+        </div>
+    </nav>
+
+    <!-- Content Area -->
+    <div class="max-w-4xl mx-auto px-6 py-6" x-show="!loading">
+        <!-- Breadcrumb row -->
+        <div class="flex justify-between items-center mb-6 py-3 px-6 bg-white border border-gray-200 shadow-sm rounded-2xl">
+            <span class="text-sm font-semibold text-gray-600">Create New Slope Parameters</span>
+            <span class="text-xs bg-lime-100 text-lime-800 font-bold px-2.5 py-0.5 rounded-full uppercase" x-text="slope.slope_type"></span>
+        </div>
+
+        <!-- Wizard Step Indicator -->
+        <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 mb-6">
+            <div class="flex items-center justify-between max-w-lg mx-auto">
+                <div class="flex flex-col items-center">
+                    <span class="w-8 h-8 rounded-full bg-lime-600 text-white flex items-center justify-center font-bold text-sm">1</span>
+                    <span class="text-xs font-bold text-lime-600 mt-2">Geometry</span>
+                </div>
+                <div class="h-0.5 bg-gray-200 flex-1 mx-4"></div>
+                <div class="flex flex-col items-center">
+                    <span class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-sm">2</span>
+                    <span class="text-xs font-semibold text-gray-400 mt-2">Characteristics</span>
+                </div>
+                <div class="h-0.5 bg-gray-200 flex-1 mx-4"></div>
+                <div class="flex flex-col items-center">
+                    <span class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-sm">3</span>
+                    <span class="text-xs font-semibold text-gray-400 mt-2">Rating</span>
+                </div>
+            </div>
+        </div>
+
+        <form @submit.prevent="submitForm()" class="space-y-6">
+            <!-- Form Card Wrapper -->
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-8 space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800" x-text="'Configure Geometry - ' + slope.slope_name"></h2>
+                    <p class="text-gray-500 text-sm mt-1">Please enter the engineering geometry measurements below. Real-time calculations are performed at the bottom.</p>
+                </div>
+                
+                <div class="border-t border-gray-100"></div>
+
+                <!-- Section Select (For Cut / Retaining / Combine Slopes) -->
+                <div class="space-y-3" x-show="['cut-type', 'retaining-type', 'combine-type'].includes(slope.slope_type)">
+                    <label class="block font-bold text-gray-700">Cross-Section Options</label>
+                    <p class="text-sm text-gray-500">Check if Section H1 &#8805; 75% of H2. If no, you must fill Section 2-2 (Maximum Feature Height) parameters too.</p>
+                    <div class="flex items-center space-x-6">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" checked disabled class="rounded border-gray-300 text-lime-600 focus:ring-lime-500 w-4 h-4">
+                            <span class="ms-2 text-sm font-semibold text-gray-400">Section 1-1 (Severity Area)</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" x-model="geo.section_2_enabled" class="rounded border-gray-300 text-lime-600 focus:ring-lime-500 w-4 h-4">
+                            <span class="ms-2 text-sm font-semibold text-gray-700">Section 2-2 (Max Height Area)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-100" x-show="['cut-type', 'retaining-type', 'combine-type'].includes(slope.slope_type)"></div>
+
+                <!-- WIZARD DYNAMIC INPUTS BASED ON SLOPE TYPE -->
+
+                <!-- CUT & COMBINE TYPE -->
+                <div class="space-y-6" x-show="slope.slope_type === 'cut-type' || slope.slope_type === 'combine-type'">
+                    <h3 class="text-lg font-bold text-gray-800">Section 1-1 Geometry</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Soil Slope Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.soil_slope_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Rock Slope Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.rock_slope_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Height R (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.height_r" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Crest Wall Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.crest_wall_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Toe Wall Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.toe_wall_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Upslope Angle (deg)</label>
+                            <input type="number" step="0.1" x-model.number="geo.upslope_angle" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Soil Bulk Unit Weight (kN/m³)</label>
+                            <input type="number" step="0.1" x-model.number="geo.soil_bulk_unit_weight" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Section 2-2 Toggleable inputs -->
+                    <div class="space-y-6 pt-4 border-t border-gray-100" x-show="geo.section_2_enabled">
+                        <h3 class="text-lg font-bold text-lime-700">Section 2-2 Geometry</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Soil Slope Height 2 (m)</label>
+                                <input type="number" step="0.1" x-model.number="geo.soil_slope_height_2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Rock Slope Height 2 (m)</label>
+                                <input type="number" step="0.1" x-model.number="geo.rock_slope_height_2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Height R 2 (m)</label>
+                                <input type="number" step="0.1" x-model.number="geo.height_r_2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Crest Wall 2 (m)</label>
+                                <input type="number" step="0.1" x-model.number="geo.crest_wall_height_2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Toe Wall 2 (m)</label>
+                                <input type="number" step="0.1" x-model.number="geo.toe_wall_height_2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Upslope Angle 2 (deg)</label>
+                                <input type="number" step="0.1" x-model.number="geo.upslope_angle_2" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROCK TYPE -->
+                <div class="space-y-6" x-show="slope.slope_type === 'rock-type'">
+                    <h3 class="text-lg font-bold text-gray-800">Rock Slope Geometry</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Rock Slope Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.rock_slope_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Soil Overburden Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.soil_slope_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Crest Wall Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.crest_wall_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Toe Wall Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.toe_wall_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FILL TYPE -->
+                <div class="space-y-6" x-show="slope.slope_type === 'fill-type'">
+                    <h3 class="text-lg font-bold text-gray-800">Fill Slope Geometry</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fill Slope Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.fill_slope_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Crest Wall Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.crest_wall_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Toe Wall Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.toe_wall_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RETAINING TYPE -->
+                <div class="space-y-6" x-show="slope.slope_type === 'retaining-type'">
+                    <h3 class="text-lg font-bold text-gray-800">Retaining Wall Geometry</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Wall Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.wall_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Soil Slope Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.soil_slope_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Rock Slope Height (m)</label>
+                            <input type="number" step="0.1" x-model.number="geo.rock_slope_height" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Computed Values Banner -->
+                <div class="bg-lime-50 border border-lime-200 p-5 rounded-2xl space-y-2 mt-6">
+                    <h4 class="font-extrabold text-lime-800 text-sm">Live Calculations:</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-xs text-gray-500 font-bold uppercase">Calculated Feature Height (Section 1-1):</span>
+                            <p class="text-lg font-black text-gray-800 mt-0.5" x-text="calculatedHeight1 + ' meters'"></p>
+                        </div>
+                        <div x-show="geo.section_2_enabled">
+                            <span class="text-xs text-gray-500 font-bold uppercase">Calculated Feature Height (Section 2-2):</span>
+                            <p class="text-lg font-black text-gray-800 mt-0.5" x-text="calculatedHeight2 + ' meters'"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sticky Bottom Buttons Bar -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-between items-center shadow-2xl z-40">
+                <a href="inventory.html" class="text-gray-500 hover:text-gray-800 font-bold text-sm">← Back to Slopes</a>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm font-semibold text-gray-400">Step 1 of 3</span>
+                    <button type="submit" class="bg-lime-600 hover:bg-lime-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-lg hover:shadow-lime-600/30">
+                        Save & Next: Characteristics →
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="flex items-center justify-center min-h-[80vh]" x-show="loading">
+        <div class="text-center space-y-3">
+            <div class="w-12 h-12 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-gray-500 font-semibold text-sm">Loading config parameters...</p>
+        </div>
+    </div>
+
+    <script>
+        function geometryHandler() {
+            return {
+                loading: true,
+                slug: '',
+                slope: {},
+                geo: {
+                    section_2_enabled: false,
+                    soil_slope_height: 0,
+                    rock_slope_height: 0,
+                    height_r: 0,
+                    crest_wall_height: 0,
+                    toe_wall_height: 0,
+                    upslope_angle: 0,
+                    soil_bulk_unit_weight: 18,
+                    soil_slope_height_2: 0,
+                    rock_slope_height_2: 0,
+                    height_r_2: 0,
+                    crest_wall_height_2: 0,
+                    toe_wall_height_2: 0,
+                    upslope_angle_2: 0,
+                    fill_slope_height: 0,
+                    wall_height: 0
+                },
+
+                init() {
+                    const params = new URLSearchParams(window.location.search);
+                    this.slug = params.get('slug') || '';
+                    if (!this.slug) {
+                        window.location.href = 'inventory.html';
+                        return;
+                    }
+                    this.fetchDetails();
+                },
+
+                fetchDetails() {
+                    this.loading = true;
+                    fetch(`/api/slopes/${this.slug}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            this.slope = data.slope;
+                            if (data.slope.geometry) {
+                                this.geo = { ...this.geo, ...data.slope.geometry };
+                            }
+                            this.loading = false;
+                        })
+                        .catch(err => {
+                            console.error('Error fetching details:', err);
+                            this.loading = false;
+                        });
+                },
+
+                get calculatedHeight1() {
+                    const type = this.slope.slope_type;
+                    if (type === 'cut-type' || type === 'combine-type') {
+                        return (this.geo.soil_slope_height || 0) + (this.geo.rock_slope_height || 0) + (this.geo.crest_wall_height || 0) + (this.geo.toe_wall_height || 0);
+                    } else if (type === 'rock-type') {
+                        return (this.geo.rock_slope_height || 0) + (this.geo.soil_slope_height || 0) + (this.geo.crest_wall_height || 0) + (this.geo.toe_wall_height || 0);
+                    } else if (type === 'fill-type') {
+                        return (this.geo.fill_slope_height || 0) + (this.geo.crest_wall_height || 0) + (this.geo.toe_wall_height || 0);
+                    } else if (type === 'retaining-type') {
+                        return (this.geo.wall_height || 0) + (this.geo.soil_slope_height || 0) + (this.geo.rock_slope_height || 0);
+                    }
+                    return 0;
+                },
+
+                get calculatedHeight2() {
+                    const type = this.slope.slope_type;
+                    if (type === 'cut-type' || type === 'combine-type') {
+                        return (this.geo.soil_slope_height_2 || 0) + (this.geo.rock_slope_height_2 || 0) + (this.geo.crest_wall_height_2 || 0) + (this.geo.toe_wall_height_2 || 0);
+                    }
+                    return 0;
+                },
+
+                submitForm() {
+                    fetch(`/api/slopes/${this.slug}/geometry`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.geo)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = `characteristic.html?slug=${this.slug}`;
+                        }
+                    })
+                    .catch(err => console.error('Error saving geometry:', err));
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Slope Risk Management System</title>
+    <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
+    <!-- Google Font Figtree -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS & Flowbite -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Figtree', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-stone-100 font-sans antialiased text-gray-900">
+    <div class="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6">
+        <div class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl transition-all duration-300 hover:shadow-lime-100 border border-gray-100">
+            <!-- Header Image Banner -->
+            <div class="flex h-44 items-center justify-center bg-cover bg-center relative" style="background-image: url('components/guest-bg.webp')">
+                <div class="absolute inset-0 bg-lime-950/40 backdrop-blur-[1px]"></div>
+                <div class="relative z-10 flex flex-col items-center text-center text-white">
+                    <img src="components/icons/icon-srms.svg" class="h-12 w-auto mb-2 animate-bounce animate-duration-1000" alt="SRMS Logo">
+                    <h1 class="text-xl font-extrabold tracking-wider uppercase leading-tight">
+                        Slope Risk<br>
+                        <span class="text-lime-300 font-bold">Management System</span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Form Body -->
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Welcome Back</h2>
+                <form id="loginForm" class="space-y-5">
+                    <!-- Email Address -->
+                    <div>
+                        <label for="email" class="block mb-2 text-sm font-semibold text-gray-700">Email Address</label>
+                        <input type="email" id="email" name="email" value="malik@gwadestek.com" required 
+                            class="block w-full px-4 py-3 bg-gray-50 border border-gray-300 text-gray-900 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-150 outline-none" 
+                            placeholder="name@company.com">
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block mb-2 text-sm font-semibold text-gray-700">Password</label>
+                        <input type="password" id="password" name="password" value="maulana45" required 
+                            class="block w-full px-4 py-3 bg-gray-50 border border-gray-300 text-gray-900 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-150 outline-none" 
+                            placeholder="••••••••">
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="flex items-center justify-between">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" checked class="rounded border-gray-300 text-lime-600 focus:ring-lime-500 w-4 h-4">
+                            <span class="ms-2 text-sm font-medium text-gray-600">Remember me</span>
+                        </label>
+                        <a href="#" class="text-sm font-semibold text-lime-600 hover:text-lime-700 hover:underline">Forgot password?</a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                        class="w-full text-white bg-lime-600 hover:bg-lime-700 focus:ring-4 focus:ring-lime-300 font-bold rounded-xl text-md px-5 py-3.5 text-center shadow-lg hover:shadow-lime-600/30 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center text-sm text-gray-500">
+                    Prototype Mode — Logging in stores session locally.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            // Store simple mock session
+            localStorage.setItem('user', JSON.stringify({
+                name: 'Malik Maulana',
+                email: email,
+                role: 'admin'
+            }));
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

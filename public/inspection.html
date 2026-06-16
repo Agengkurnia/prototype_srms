@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspection Dashboard | Slope Risk Management System</title>
+    <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
+    <!-- Google Font Figtree -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS & Flowbite & Alpine.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Figtree', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .active-nav {
+            border-bottom: 2px solid #65a30d;
+            color: #65a30d !important;
+        }
+        .active-tab {
+            border-bottom: 2px solid #65a30d;
+            color: #65a30d;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 font-sans antialiased text-gray-900" x-data="inspectionHandler()" x-init="init()">
+
+    <!-- Header Navigation -->
+    <nav class="relative z-40 w-full bg-white shadow-sm border-b border-gray-100">
+        <div class="flex flex-wrap justify-between items-center mx-auto py-3.5 px-6 max-w-7xl">
+            <a href="index.html" class="flex items-center space-x-3">
+                <div class="flex items-center">
+                    <img src="components/icons/icon-srms.svg" class="w-8 mr-2.5" alt="Logo">
+                    <p class="font-black text-sm uppercase leading-tight tracking-wider text-gray-800">
+                        Slope Risk<br><span class="text-lime-600">Management System</span>
+                    </p>
+                </div>
+            </a>
+            
+            <button data-collapse-toggle="mega-menu-full" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none" aria-controls="mega-menu-full" aria-expanded="false">
+                <span class="sr-only">Open main menu</span>
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 17 14"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/></svg>
+            </button>
+
+            <div id="mega-menu-full" class="items-center justify-between font-medium hidden w-full md:flex md:w-auto md:order-1">
+                <ul class="flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 md:flex-row md:mt-0 md:border-0 bg-white items-center">
+                    <li><a href="index.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Dashboard</a></li>
+                    <li><a href="inventory.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Inventory</a></li>
+                    <li><a href="priority.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Priority</a></li>
+                    <li><a href="inspection.html" class="block py-2 px-3 active-nav font-bold">Inspection</a></li>
+                    <li><a href="preservation.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold font-semibold">Preservation</a></li>
+                    <li><a href="mitigation.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold font-semibold">Mitigation</a></li>
+                    <li class="border-l border-gray-200 h-6 mx-2 hidden md:block"></li>
+                    <!-- User Account Dropdown -->
+                    <li>
+                        <button id="dropdownMenuIconButton" data-dropdown-toggle="dropdownDots" class="inline-flex items-center p-2 text-sm font-medium text-center rounded-xl hover:bg-gray-50 focus:outline-none transition" type="button">
+                            <div class="mr-2.5 font-bold text-sm text-gray-800" x-text="userName"></div>
+                            <svg class="w-6 h-6 text-lime-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/></svg>
+                        </button>
+                        <div id="dropdownDots" class="z-50 hidden bg-white divide-y divide-gray-100 rounded-xl shadow-lg w-44 border border-gray-100">
+                            <ul class="py-2 text-sm text-gray-700">
+                                <li><a href="#" @click.prevent="logout()" class="block px-4 py-2 hover:bg-red-50 text-red-600 font-semibold">Log Out</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Wrapper -->
+    <div class="max-w-7xl mx-auto px-6 py-6 space-y-6" x-show="!loading">
+
+        <!-- Title and Action Section -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-2 border-b border-gray-200 gap-4">
+            <div>
+                <nav class="flex items-center text-xs text-gray-400 font-semibold mb-1" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1">
+                        <li><a href="index.html" class="hover:text-lime-600 transition">Home</a></li>
+                        <li><svg class="w-2.5 h-2.5 text-gray-300 mx-1" fill="none" viewBox="0 0 6 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/></svg></li>
+                        <li class="text-gray-500 font-bold">Inspection Portal</li>
+                    </ol>
+                </nav>
+                <h2 class="text-2xl font-black text-gray-800 tracking-tight">Inspection & Maintenance schedules</h2>
+                <p class="text-xs text-gray-400">Monitor upcoming routine inspections, view historic engineer logs, and log maintenance summaries</p>
+            </div>
+            
+            <div class="flex gap-2">
+                <button @click="openModal('maintenance')" class="bg-lime-600 hover:bg-lime-700 text-white font-bold px-4 py-2 text-xs rounded-xl shadow-md transition">
+                    + Log Routine Maintenance
+                </button>
+            </div>
+        </div>
+
+        <!-- Metric Badges Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Historical Logs</span>
+                    <h4 class="text-xl font-black text-lime-600" x-text="inspections.length">0</h4>
+                </div>
+                <div class="p-2.5 bg-lime-50 text-lime-600 rounded-xl">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Maintenances Logged</span>
+                    <h4 class="text-xl font-black text-blue-600" x-text="maintenances.length">0</h4>
+                </div>
+                <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Slopes Monitored</span>
+                    <h4 class="text-xl font-black text-stone-700" x-text="slopes.length">0</h4>
+                </div>
+                <div class="p-2.5 bg-stone-50 text-stone-600 rounded-xl">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="border-b border-gray-200">
+            <ul class="flex flex-wrap -mb-px text-sm font-semibold text-center text-gray-500">
+                <li class="me-2">
+                    <button @click="activeTab = 'schedule'" :class="activeTab === 'schedule' ? 'active-tab' : ''" class="inline-block p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 rounded-t-lg transition">Schedules & Slopes</button>
+                </li>
+                <li class="me-2">
+                    <button @click="activeTab = 'history'" :class="activeTab === 'history' ? 'active-tab' : ''" class="inline-block p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 rounded-t-lg transition">Historical Engineering Logs</button>
+                </li>
+                <li class="me-2">
+                    <button @click="activeTab = 'maintenance_logs'" :class="activeTab === 'maintenance_logs' ? 'active-tab' : ''" class="inline-block p-4 border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 rounded-t-lg transition">Historical Maintenances</button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tab Content 1: Schedules -->
+        <div x-show="activeTab === 'schedule'" class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-4">
+            <div class="flex justify-between items-center flex-wrap gap-2">
+                <h3 class="font-extrabold text-gray-800 text-base">Next Inspection Timelines</h3>
+                <input x-model="searchQuery" type="text" placeholder="Search slope..." class="text-xs border border-gray-200 rounded-xl px-3 py-1.5 w-60 bg-stone-50">
+            </div>
+
+            <div class="overflow-x-auto border border-gray-150 rounded-2xl">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-600 uppercase bg-stone-50 border-b border-gray-150 font-bold">
+                        <tr>
+                            <th scope="col" class="px-5 py-3">Slope Name</th>
+                            <th scope="col" class="px-5 py-3">Consequence Category</th>
+                            <th scope="col" class="px-5 py-3">Next Engineer Inspection</th>
+                            <th scope="col" class="px-5 py-3">Next Routine Maintenance</th>
+                            <th scope="col" class="px-5 py-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="s in filteredSlopes()" :key="s.id">
+                            <tr class="border-b border-gray-100 hover:bg-stone-50/70 transition">
+                                <td class="px-5 py-3.5">
+                                    <div class="font-extrabold text-gray-800" x-text="s.slope_name"></div>
+                                    <div class="text-[10px] text-gray-400 font-semibold" x-text="s.location"></div>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <span class="inline-block px-2.5 py-0.5 text-xs font-bold bg-stone-100 text-stone-700 rounded-full" x-text="s.rating?.consequence_to_life ? s.rating.consequence_to_life.replace('category-', 'Category ') : 'Category 2'"></span>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <div class="font-bold text-gray-700" x-text="s.engineer_inspection ? formatDate(s.engineer_inspection) : 'Not Inspected'"></div>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <div class="font-bold text-gray-700" x-text="s.maintenance_inspection ? formatDate(s.maintenance_inspection) : 'Not Inspected'"></div>
+                                </td>
+                                <td class="px-5 py-3.5 text-right space-x-2">
+                                    <a :href="'detail.html?slug=' + s.slug + '&tab=rating'" class="text-lime-600 hover:text-lime-700 font-bold text-xs hover:underline">Inspect (CRUD)</a>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="filteredSlopes().length === 0">
+                            <td colspan="5" class="text-center py-8 text-gray-400 italic">No slopes found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab Content 2: Historical Inspections -->
+        <div x-show="activeTab === 'history'" class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-4">
+            <h3 class="font-extrabold text-gray-800 text-base">Engineering Rating History</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <template x-for="insp in inspections" :key="insp.id">
+                    <div class="border border-gray-150 rounded-2xl p-5 hover:shadow-md transition bg-stone-50/50 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-extrabold text-gray-800 text-base" x-text="insp.slope_name"></h4>
+                                    <span class="text-[10px] text-gray-400 font-bold uppercase" x-text="formatDate(insp.date_of_inspection) + ' | ' + insp.weather_condition"></span>
+                                </div>
+                                <span class="bg-lime-100 text-lime-800 text-xs font-black px-2.5 py-1 rounded-lg" x-text="'RS: ' + (insp.ranking?.RS ? parseFloat(insp.ranking.RS).toFixed(2) : '0')"></span>
+                            </div>
+                            
+                            <!-- Snapshot characteristics -->
+                            <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-gray-600 mt-3 border-t border-gray-100 pt-3">
+                                <div>Drainage: <span class="text-gray-900" x-text="insp.characteristic?.surface_drainage_provision || '-'"></span></div>
+                                <div>Protection: <span class="text-gray-900" x-text="insp.characteristic?.slope_protection || '-'"></span></div>
+                                <div>Signs of distress: <span class="text-gray-900" x-text="insp.characteristic?.signs_of_distress || 'None'"></span></div>
+                                <div>Instability after: <span class="text-gray-900" x-text="insp.characteristic?.instability_after || 'None'"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center text-xs font-bold pt-2 border-t border-gray-100">
+                            <span class="text-gray-400" x-text="'IS: ' + (insp.ranking?.IS || '-') + ' | CS: ' + (insp.ranking?.CS || '-') + ' | TS: ' + (insp.ranking?.TS || '-')"></span>
+                            <a :href="'detail.html?slug=' + insp.slug" class="text-lime-600 hover:text-lime-700 hover:underline">View Active Slope →</a>
+                        </div>
+                    </div>
+                </template>
+                <div x-show="inspections.length === 0" class="col-span-2 text-center py-8 text-gray-400 italic">No historical rating records in database.</div>
+            </div>
+        </div>
+
+        <!-- Tab Content 3: Maintenance Logs -->
+        <div x-show="activeTab === 'maintenance_logs'" class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-4">
+            <h3 class="font-extrabold text-gray-800 text-base">Routine Roadway Maintenance Archive</h3>
+
+            <div class="space-y-4">
+                <template x-for="m in maintenances" :key="m.id">
+                    <div class="p-4 bg-stone-50 border border-gray-150 rounded-2xl flex justify-between items-center hover:bg-stone-100/50 transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-extrabold text-gray-800" x-text="m.slope_name"></span>
+                                <span class="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full" x-text="m.date_of_maintenance"></span>
+                                <span class="text-[10px] text-gray-400" x-text="'Weather: ' + m.weather_condition"></span>
+                            </div>
+                            <p class="text-xs text-gray-600 font-semibold" x-text="m.resume"></p>
+                        </div>
+                        <a :href="'detail.html?slug=' + m.slug" class="text-xs font-bold text-lime-600 hover:underline">Open Slope Detail</a>
+                    </div>
+                </template>
+                <div x-show="maintenances.length === 0" class="text-center py-8 text-gray-400 italic">No maintenance actions logged.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Record Maintenance Modal -->
+    <div x-show="modalOpen" class="fixed inset-0 z-50 overflow-y-auto bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-gray-100 transform transition-all">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <h3 class="text-lg font-black text-gray-800">Log Routine Maintenance Activity</h3>
+                <button @click="modalOpen = false" class="text-gray-400 hover:text-gray-600 transition">&times;</button>
+            </div>
+
+            <form @submit.prevent="submitMaintenance()" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Target Slope</label>
+                    <select x-model="mForm.slug" class="w-full text-sm border-gray-200 rounded-xl focus:ring-lime-500 focus:border-lime-500 bg-stone-50" required>
+                        <option value="">Select a slope...</option>
+                        <template x-for="s in slopes" :key="s.slug">
+                            <option :value="s.slug" x-text="s.slope_name"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Date of Work</label>
+                        <input x-model="mForm.date_of_maintenance" type="date" class="w-full text-sm border-gray-200 rounded-xl focus:ring-lime-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Weather Condition</label>
+                        <select x-model="mForm.weather_condition" class="w-full text-sm border-gray-200 rounded-xl focus:ring-lime-500 bg-stone-50">
+                            <option value="Sunny">Sunny</option>
+                            <option value="Cloudy">Cloudy</option>
+                            <option value="Rainy">Rainy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Work Description / Resume</label>
+                    <textarea x-model="mForm.resume" rows="4" placeholder="Detail any routine maintenance performed (clearing drains, vegetation patches, temporary cover)..." class="w-full text-sm border-gray-200 rounded-xl focus:ring-lime-500" required></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" @click="modalOpen = false" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 text-xs rounded-xl transition">Cancel</button>
+                    <button type="submit" class="bg-lime-600 hover:bg-lime-700 text-white font-bold px-5 py-2 text-xs rounded-xl shadow-md transition">Save Log</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Screen Placeholder -->
+    <div class="flex items-center justify-center min-h-screen bg-stone-50" x-show="loading">
+        <div class="text-center space-y-3">
+            <div class="w-12 h-12 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-gray-500 font-semibold text-sm">Compiling inspection archives...</p>
+        </div>
+    </div>
+
+    <!-- Flowbite JS Bundle -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
+    <script>
+        function inspectionHandler() {
+            return {
+                userName: 'Admin User',
+                loading: true,
+                activeTab: 'schedule',
+                slopes: [],
+                inspections: [],
+                maintenances: [],
+                searchQuery: '',
+                modalOpen: false,
+                mForm: {
+                    slug: '',
+                    date_of_maintenance: new Date().toISOString().split('T')[0],
+                    weather_condition: 'Sunny',
+                    resume: ''
+                },
+
+                init() {
+                    const session = localStorage.getItem('user');
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    const user = JSON.parse(session);
+                    this.userName = user.name;
+                    
+                    this.fetchData();
+                },
+
+                fetchData() {
+                    Promise.all([
+                        fetch('/api/slopes').then(res => res.json()),
+                        fetch('/api/inspections').then(res => res.json()),
+                        fetch('/api/maintenances').then(res => res.json())
+                    ]).then(([slopes, inspections, maintenances]) => {
+                        this.slopes = slopes;
+                        this.inspections = inspections.reverse();
+                        this.maintenances = maintenances.reverse();
+                        this.loading = false;
+                    }).catch(err => {
+                        console.error('Error fetching data:', err);
+                        this.loading = false;
+                    });
+                },
+
+                filteredSlopes() {
+                    return this.slopes.filter(s => {
+                        return s.slope_name.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+                               (s.location && s.location.toLowerCase().includes(this.searchQuery.toLowerCase()));
+                    });
+                },
+
+                openModal() {
+                    this.mForm = {
+                        slug: '',
+                        date_of_maintenance: new Date().toISOString().split('T')[0],
+                        weather_condition: 'Sunny',
+                        resume: ''
+                    };
+                    this.modalOpen = true;
+                },
+
+                submitMaintenance() {
+                    if (!this.mForm.slug) return;
+                    
+                    fetch(`/api/slopes/${this.mForm.slug}/maintenances`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            date_of_maintenance: this.mForm.date_of_maintenance,
+                            weather_condition: this.mForm.weather_condition,
+                            resume: this.mForm.resume
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success) {
+                            this.modalOpen = false;
+                            this.loading = true;
+                            this.fetchData(); // Reload list
+                        }
+                    })
+                    .catch(err => console.error('Error adding maintenance log:', err));
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return '-';
+                    const d = new Date(dateStr);
+                    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                },
+
+                logout() {
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

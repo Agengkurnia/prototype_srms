@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slope Preservation | Slope Risk Management System</title>
+    <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
+    <!-- Google Font Figtree -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS & Flowbite & Alpine.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Figtree', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .active-nav {
+            border-bottom: 2px solid #65a30d;
+            color: #65a30d !important;
+        }
+        .active-tab {
+            border-bottom: 2px solid #65a30d;
+            color: #65a30d;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 font-sans antialiased text-gray-900" x-data="preservationHandler()" x-init="init()">
+
+    <!-- Header Navigation -->
+    <nav class="relative z-40 w-full bg-white shadow-sm border-b border-gray-100">
+        <div class="flex flex-wrap justify-between items-center mx-auto py-3.5 px-6 max-w-7xl">
+            <a href="index.html" class="flex items-center space-x-3">
+                <div class="flex items-center">
+                    <img src="components/icons/icon-srms.svg" class="w-8 mr-2.5" alt="Logo">
+                    <p class="font-black text-sm uppercase leading-tight tracking-wider text-gray-800">
+                        Slope Risk<br><span class="text-lime-600">Management System</span>
+                    </p>
+                </div>
+            </a>
+            
+            <button data-collapse-toggle="mega-menu-full" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none" aria-controls="mega-menu-full" aria-expanded="false">
+                <span class="sr-only">Open main menu</span>
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 17 14"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/></svg>
+            </button>
+
+            <div id="mega-menu-full" class="items-center justify-between font-medium hidden w-full md:flex md:w-auto md:order-1">
+                <ul class="flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 md:flex-row md:mt-0 md:border-0 bg-white items-center">
+                    <li><a href="index.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold font-semibold">Dashboard</a></li>
+                    <li><a href="inventory.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Inventory</a></li>
+                    <li><a href="priority.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Priority</a></li>
+                    <li><a href="inspection.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Inspection</a></li>
+                    <li><a href="preservation.html" class="block py-2 px-3 active-nav font-bold">Preservation</a></li>
+                    <li><a href="mitigation.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold font-semibold font-semibold">Mitigation</a></li>
+                    <li class="border-l border-gray-200 h-6 mx-2 hidden md:block"></li>
+                    <!-- User Account Dropdown -->
+                    <li>
+                        <button id="dropdownMenuIconButton" data-dropdown-toggle="dropdownDots" class="inline-flex items-center p-2 text-sm font-medium text-center rounded-xl hover:bg-gray-50 focus:outline-none transition" type="button">
+                            <div class="mr-2.5 font-bold text-sm text-gray-800" x-text="userName"></div>
+                            <svg class="w-6 h-6 text-lime-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/></svg>
+                        </button>
+                        <div id="dropdownDots" class="z-50 hidden bg-white divide-y divide-gray-100 rounded-xl shadow-lg w-44 border border-gray-100">
+                            <ul class="py-2 text-sm text-gray-700">
+                                <li><a href="#" @click.prevent="logout()" class="block px-4 py-2 hover:bg-red-50 text-red-600 font-semibold">Log Out</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Wrapper -->
+    <div class="max-w-7xl mx-auto px-6 py-6 space-y-6" x-show="!loading">
+
+        <!-- Title -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-2 border-b border-gray-200 gap-4">
+            <div>
+                <nav class="flex items-center text-xs text-gray-400 font-semibold mb-1" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1">
+                        <li><a href="index.html" class="hover:text-lime-600 transition">Home</a></li>
+                        <li><svg class="w-2.5 h-2.5 text-gray-300 mx-1" fill="none" viewBox="0 0 6 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/></svg></li>
+                        <li class="text-gray-500 font-bold">Slope Preservation</li>
+                    </ol>
+                </nav>
+                <h2 class="text-2xl font-black text-gray-800 tracking-tight">Preservation & Landslide Improvement</h2>
+                <p class="text-xs text-gray-400">Track and manage emergency landslide repairs and strategic reinforcement improvement works</p>
+            </div>
+        </div>
+
+        <!-- Side A/B and Type Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Side A -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Side A Assets</span>
+                    <h4 class="text-xl font-black text-lime-600" x-text="slopes.filter(s => s.side_of_road === 'A').length">0</h4>
+                </div>
+                <span class="text-xs bg-lime-100 text-lime-800 font-bold px-2 py-0.5 rounded-full">Side A</span>
+            </div>
+
+            <!-- Side B -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Side B Assets</span>
+                    <h4 class="text-xl font-black text-lime-600" x-text="slopes.filter(s => s.side_of_road === 'B').length">0</h4>
+                </div>
+                <span class="text-xs bg-lime-100 text-lime-800 font-bold px-2 py-0.5 rounded-full">Side B</span>
+            </div>
+
+            <!-- Total Landslides -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Active Landslides</span>
+                    <h4 class="text-xl font-black text-red-600" x-text="preservations.length">0</h4>
+                </div>
+                <span class="text-xs bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded-full">Repair Log</span>
+            </div>
+
+            <!-- Type 3 works -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Upgrading Works</span>
+                    <h4 class="text-xl font-black text-blue-600" x-text="preservations.filter(p => p.type_of_improvement_works === 'Upgrading works').length">0</h4>
+                </div>
+                <span class="text-xs bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full">Upgrades</span>
+            </div>
+        </div>
+
+        <!-- Layout Split: Left Slopes List, Right Overall Landslide Timeline -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left column: Slopes selection table -->
+            <div class="lg:col-span-2 bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-4">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <h3 class="font-extrabold text-gray-800 text-base">Select Slope to View/Record Preservation Timeline</h3>
+                    <input x-model="searchQuery" type="text" placeholder="Search by name..." class="text-xs border border-gray-200 rounded-xl px-3 py-1.5 w-60 bg-stone-50">
+                </div>
+
+                <div class="overflow-x-auto border border-gray-150 rounded-2xl">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-600 uppercase bg-stone-50 border-b border-gray-150 font-bold">
+                            <tr>
+                                <th scope="col" class="px-5 py-3">Slope Name</th>
+                                <th scope="col" class="px-5 py-3">Side</th>
+                                <th scope="col" class="px-5 py-3 text-center">Landslides Logged</th>
+                                <th scope="col" class="px-5 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="s in filteredSlopes()" :key="s.id">
+                                <tr class="border-b border-gray-100 hover:bg-stone-50/70 transition">
+                                    <td class="px-5 py-3.5">
+                                        <div class="font-extrabold text-gray-800" x-text="s.slope_name"></div>
+                                        <div class="text-[10px] text-gray-400 font-semibold" x-text="s.location"></div>
+                                    </td>
+                                    <td class="px-5 py-3.5 font-bold text-gray-700" x-text="'Side ' + s.side_of_road"></td>
+                                    <td class="px-5 py-3.5 text-center font-bold text-gray-700" x-text="getLandslideCount(s.slug)"></td>
+                                    <td class="px-5 py-3.5 text-right">
+                                        <a :href="'preservation-detail.html?slug=' + s.slug" class="inline-block bg-lime-50 hover:bg-lime-100 text-lime-700 font-bold px-3 py-1.5 text-xs rounded-xl transition">
+                                            Open Timeline &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            </template>
+                            <tr x-show="filteredSlopes().length === 0">
+                                <td colspan="4" class="text-center py-8 text-gray-400 italic">No slopes found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right column: Global historical landslide upgrades timeline -->
+            <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 class="font-extrabold text-gray-800 text-base">Recent Improvement timeline</h3>
+                <div class="space-y-4 max-h-[420px] overflow-y-auto pr-1">
+                    <template x-for="p in preservations" :key="p.id">
+                        <div class="p-4 bg-stone-50 border border-gray-150 rounded-2xl space-y-2 hover:bg-stone-100/50 transition">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-extrabold text-xs text-lime-700" x-text="p.slope_name"></h4>
+                                    <span class="text-[9px] text-gray-400 font-semibold" x-text="formatDate(p.date_of_landslide)"></span>
+                                </div>
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded"
+                                      :class="p.type_of_improvement_works === 'Upgrading works' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'"
+                                      x-text="p.type_of_improvement_works"></span>
+                            </div>
+                            <p class="text-[11px] text-gray-600 font-medium" x-text="p.note"></p>
+                            <div class="text-[9px] text-gray-400 font-bold border-t border-gray-100 pt-1.5 flex justify-between">
+                                <span x-text="'Type: ' + (p.type?.type ? p.type.type.toUpperCase() : 'TYPE 1')"></span>
+                                <a :href="'preservation-detail.html?slug=' + p.slug" class="text-lime-600 hover:underline">Details &rarr;</a>
+                            </div>
+                        </div>
+                    </template>
+                    <div x-show="preservations.length === 0" class="text-center py-8 text-gray-400 italic">No landslide improvement records.</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Loading Screen Placeholder -->
+    <div class="flex items-center justify-center min-h-screen bg-stone-50" x-show="loading">
+        <div class="text-center space-y-3">
+            <div class="w-12 h-12 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-gray-500 font-semibold text-sm">Compiling landslide improvement files...</p>
+        </div>
+    </div>
+
+    <!-- Flowbite JS Bundle -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
+    <script>
+        function preservationHandler() {
+            return {
+                userName: 'Admin User',
+                loading: true,
+                slopes: [],
+                preservations: [],
+                searchQuery: '',
+
+                init() {
+                    const session = localStorage.getItem('user');
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    const user = JSON.parse(session);
+                    this.userName = user.name;
+                    
+                    this.fetchData();
+                },
+
+                fetchData() {
+                    Promise.all([
+                        fetch('/api/slopes').then(res => res.json()),
+                        fetch('/api/preservations').then(res => res.json())
+                    ]).then(([slopes, preservations]) => {
+                        this.slopes = slopes;
+                        this.preservations = preservations.reverse();
+                        this.loading = false;
+                    }).catch(err => {
+                        console.error('Error fetching preservation details:', err);
+                        this.loading = false;
+                    });
+                },
+
+                filteredSlopes() {
+                    return this.slopes.filter(s => {
+                        return s.slope_name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                               (s.location && s.location.toLowerCase().includes(this.searchQuery.toLowerCase()));
+                    });
+                },
+
+                getLandslideCount(slug) {
+                    return this.preservations.filter(p => p.slug === slug).length;
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return '-';
+                    const d = new Date(dateStr);
+                    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                },
+
+                logout() {
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

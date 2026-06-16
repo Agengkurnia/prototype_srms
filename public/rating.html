@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 3: Risk Scoring & Rating | Slope Risk Management System</title>
+    <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Figtree', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-stone-100 font-sans antialiased text-gray-900 pb-28" x-data="ratingHandler()" x-init="init()">
+
+    <!-- Header Navigation -->
+    <nav class="relative z-40 w-full bg-white shadow-sm border-b border-gray-100">
+        <div class="flex justify-between items-center mx-auto py-3.5 px-6 max-w-7xl">
+            <div class="flex items-center">
+                <img src="components/icons/icon-srms.svg" class="w-8 mr-2.5" alt="Logo">
+                <p class="font-black text-sm uppercase leading-tight tracking-wider text-gray-800">
+                    Slope Risk<br><span class="text-lime-600">Management System</span>
+                </p>
+            </div>
+            <a href="inventory.html" class="text-sm font-bold text-gray-500 hover:text-gray-700">Cancel & Exit</a>
+        </div>
+    </nav>
+
+    <!-- Content Area -->
+    <div class="max-w-4xl mx-auto px-6 py-6" x-show="!loading">
+        <!-- Breadcrumb row -->
+        <div class="flex justify-between items-center mb-6 py-3 px-6 bg-white border border-gray-200 shadow-sm rounded-2xl">
+            <span class="text-sm font-semibold text-gray-600">Create New Slope Parameters</span>
+            <span class="text-xs bg-lime-100 text-lime-800 font-bold px-2.5 py-0.5 rounded-full uppercase" x-text="slope.slope_type"></span>
+        </div>
+
+        <!-- Wizard Step Indicator -->
+        <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 mb-6">
+            <div class="flex items-center justify-between max-w-lg mx-auto">
+                <div class="flex flex-col items-center">
+                    <span class="w-8 h-8 rounded-full bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm">1</span>
+                    <span class="text-xs font-semibold text-lime-700 mt-2">Geometry</span>
+                </div>
+                <div class="h-0.5 bg-lime-600 flex-1 mx-4"></div>
+                <div class="flex flex-col items-center">
+                    <span class="w-8 h-8 rounded-full bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm">2</span>
+                    <span class="text-xs font-semibold text-lime-700 mt-2">Characteristics</span>
+                </div>
+                <div class="h-0.5 bg-lime-600 flex-1 mx-4"></div>
+                <div class="flex flex-col items-center">
+                    <span class="w-8 h-8 rounded-full bg-lime-600 text-white flex items-center justify-center font-bold text-sm">3</span>
+                    <span class="text-xs font-bold text-lime-600 mt-2">Rating</span>
+                </div>
+            </div>
+        </div>
+
+        <form @submit.prevent="submitForm()" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            <!-- Left 2/3 Rating Input Form -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-8 space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Geological & Risk Rating</h2>
+                        <p class="text-gray-500 text-sm mt-1">Select the values for each factor. Instability (IS) and Consequence (CS) scores are automatically compiled on the right sidebar.</p>
+                    </div>
+
+                    <div class="border-t border-gray-100"></div>
+
+                    <!-- Generic Rating Factors (Cut, Combine, Retaining, Rock) -->
+                    <div class="space-y-4" x-show="slope.slope_type !== 'fill-type'">
+                        <h3 class="font-extrabold text-gray-700 text-base">Instability Factors (A & B)</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">A1: Geological structure</label>
+                                <select x-model.number="rating.A1" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Favorable)</option>
+                                    <option value="2">2 (Mildly Jointed)</option>
+                                    <option value="3">3 (Faulted / Unfavorable)</option>
+                                    <option value="4">4 (Very Unfavorable)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">A2: Slope geometry</label>
+                                <select x-model.number="rating.A2" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Flatter than 30 deg)</option>
+                                    <option value="2">2 (30-45 deg)</option>
+                                    <option value="3">3 (45-60 deg)</option>
+                                    <option value="4">4 (Steeper than 60 deg)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">A3: Seepage / Hydrology</label>
+                                <select x-model.number="rating.A3" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Dry)</option>
+                                    <option value="2">2 (Damp)</option>
+                                    <option value="3">3 (Wet / Active Seepage)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">A4: Vegetation / Erosion</label>
+                                <select x-model.number="rating.A4" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Fully vegetated)</option>
+                                    <option value="2">2 (Minor erosion)</option>
+                                    <option value="3">3 (Severe erosion / bare soil)</option>
+                                </select>
+                            </div>
+                            <!-- A5 is only for cut-type, combine-type, retaining-type -->
+                            <div x-show="slope.slope_type !== 'rock-type'">
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">A5: Engineering works</label>
+                                <select x-model.number="rating.A5" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Fully protected)</option>
+                                    <option value="2">2 (Partially protected)</option>
+                                    <option value="3">3 (Unprotected)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">B1: Instability history</label>
+                                <select x-model.number="rating.B1" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (No failure history)</option>
+                                    <option value="2">2 (Minor failure history)</option>
+                                    <option value="3">3 (Major failure history)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">B2: Catchment area</label>
+                                <select x-model.number="rating.B2" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Small catchment)</option>
+                                    <option value="2">2 (Moderate catchment)</option>
+                                    <option value="3">3 (Large catchment)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-100 my-4"></div>
+
+                        <h3 class="font-extrabold text-gray-700 text-base">Consequence Factors (C & D)</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">C1: Road usage frequency</label>
+                                <select x-model.number="rating.C1" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Low usage / local)</option>
+                                    <option value="2">2 (Moderate / collector)</option>
+                                    <option value="3">3 (High / Arterial highway)</option>
+                                    <option value="4">4 (Very High / Toll road)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">C2: Distance to shoulder</label>
+                                <select x-model.number="rating.C2" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Far > 5m)</option>
+                                    <option value="2">2 (Moderate 2-5m)</option>
+                                    <option value="3">3 (Close < 2m)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">D1: Traffic speed</label>
+                                <select x-model.number="rating.D1" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Speed < 40 km/h)</option>
+                                    <option value="2">2 (Speed 40-80 km/h)</option>
+                                    <option value="3">3 (Speed > 80 km/h)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">D2: Sight distance</label>
+                                <select x-model.number="rating.D2" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Good sight > 100m)</option>
+                                    <option value="2">2 (Moderate 50-100m)</option>
+                                    <option value="3">3 (Poor < 50m)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Failure Scale Factor (only for rock-type) -->
+                        <div x-show="slope.slope_type === 'rock-type'" class="pt-4 border-t border-gray-100">
+                            <label class="block mb-1 text-xs font-bold text-gray-500 uppercase">Rock Scale of Failure (K Factor)</label>
+                            <select x-model="rating.scale_of_failure" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                <option value="Small">Small (K = 1)</option>
+                                <option value="Medium">Medium (K = 3)</option>
+                                <option value="Large">Large (K = 5)</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- Fill Type Specific Scoring -->
+                    <div class="space-y-4" x-show="slope.slope_type === 'fill-type'">
+                        <h3 class="font-extrabold text-gray-700 text-base">Fill Slope Instability Factors</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">A1: Embankment quality</label>
+                                <select x-model.number="rating.A1" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Good compaction)</option>
+                                    <option value="2">2 (Moderate compaction)</option>
+                                    <option value="3">3 (Poor compaction)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">A2: Failure Mode 1 weight</label>
+                                <select x-model.number="rating.A2" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Low risk)</option>
+                                    <option value="2">2 (Medium risk)</option>
+                                    <option value="3">3 (High risk)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">A3: Failure Mode 2 weight</label>
+                                <select x-model.number="rating.A3" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Low)</option>
+                                    <option value="2">2 (Medium)</option>
+                                    <option value="3">3 (High)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">A4: Failure Mode 3 weight</label>
+                                <select x-model.number="rating.A4" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Low)</option>
+                                    <option value="2">2 (Medium)</option>
+                                    <option value="3">3 (High)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">B1: Drainage provision</label>
+                                <select x-model.number="rating.B1" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Fully drained)</option>
+                                    <option value="2">2 (Partially drained)</option>
+                                    <option value="3">3 (No drains)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">B2: Water table</label>
+                                <select x-model.number="rating.B2" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Deep)</option>
+                                    <option value="2">2 (Medium)</option>
+                                    <option value="3">3 (High / Seepage)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-100 my-4"></div>
+
+                        <h3 class="font-extrabold text-gray-700 text-base">Fill Slope Consequence Factors</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">C1: Road usage class</label>
+                                <select x-model.number="rating.C1" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Local)</option>
+                                    <option value="2">2 (Collector)</option>
+                                    <option value="3">3 (Toll Road)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">C21: Consequence Mode 1</label>
+                                <select x-model.number="rating.C21" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Low)</option>
+                                    <option value="2">2 (Medium)</option>
+                                    <option value="3">3 (High)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">C22: Consequence Mode 2</label>
+                                <select x-model.number="rating.C22" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Low)</option>
+                                    <option value="2">2 (Medium)</option>
+                                    <option value="3">3 (High)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">C23: Consequence Mode 3</label>
+                                <select x-model.number="rating.C23" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Low)</option>
+                                    <option value="2">2 (Medium)</option>
+                                    <option value="3">3 (High)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">D1: Traffic volume weight</label>
+                                <select x-model.number="rating.D1" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1 (Low)</option>
+                                    <option value="2">2 (Medium)</option>
+                                    <option value="3">3 (High)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">D21: Consequence Mode 1 (D)</label>
+                                <select x-model.number="rating.D21" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">D22: Consequence Mode 2 (D)</label>
+                                <select x-model.number="rating.D22" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">D23: Consequence Mode 3 (D)</label>
+                                <select x-model.number="rating.D23" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm">
+                                    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 my-4"></div>
+
+                    <!-- Consequence to life category select -->
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Consequence to Life Category</label>
+                        <select x-model="rating.consequence_to_life" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                            <option value="category-1">Category 1 (Immediate / High Risk)</option>
+                            <option value="category-2">Category 2 (Standard Risk)</option>
+                            <option value="category-3">Category 3 (Low / Remote Risk)</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">Determines the engineer inspection frequency timeline.</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right 1/3 Floating Computed Summary Box -->
+            <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
+                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
+                    <h3 class="font-bold text-gray-800 text-lg">Scoring Summary</h3>
+                    
+                    <div class="border-t border-gray-100 pt-2"></div>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 px-4 py-3.5 rounded-2xl">
+                            <span class="text-xs text-gray-500 font-bold uppercase">Computed Ranking Score (RS):</span>
+                            <h4 class="text-4xl font-black text-lime-600 mt-1" x-text="computedScores.RS.toFixed(2)">0.00</h4>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3.5 rounded-2xl">
+                            <span class="text-xs text-gray-500 font-bold uppercase">Instability Score (IS):</span>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" x-text="computedScores.IS">1</h4>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3.5 rounded-2xl">
+                            <span class="text-xs text-gray-500 font-bold uppercase">Consequence Score (CS):</span>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" x-text="computedScores.CS.toFixed(2)">0.00</h4>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3.5 rounded-2xl">
+                            <span class="text-xs text-gray-500 font-bold uppercase">Total Score (TS):</span>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" x-text="computedScores.TS.toFixed(2)">0.00</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-2 text-xs text-gray-500">
+                    <h4 class="font-bold text-gray-700">Scoring Guidelines:</h4>
+                    <p>RS = TS * Coefficient factor (Cut/Combine = 0.063/0.09, Rock = 0.022, retaining = 0.027).</p>
+                    <p>Inspection schedules: Category 1 & 2 = 5 Years, Category 3 = 10 Years.</p>
+                </div>
+            </div>
+
+            <!-- Sticky Bottom Buttons Bar -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-between items-center shadow-2xl z-40">
+                <a :href="'characteristic.html?slug=' + slug" class="text-gray-500 hover:text-gray-800 font-bold text-sm">← Back: Characteristics</a>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm font-semibold text-gray-400">Step 3 of 3</span>
+                    <button type="submit" class="bg-lime-600 hover:bg-lime-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-lg hover:shadow-lime-600/30">
+                        Compile & Finish Configuration
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="flex items-center justify-center min-h-[80vh]" x-show="loading">
+        <div class="text-center space-y-3">
+            <div class="w-12 h-12 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-gray-500 font-semibold text-sm">Loading config parameters...</p>
+        </div>
+    </div>
+
+    <script>
+        function ratingHandler() {
+            return {
+                loading: true,
+                slug: '',
+                slope: {},
+                rating: {
+                    A1: 1, A2: 1, A3: 1, A4: 1, A5: 1,
+                    B1: 1, B2: 1,
+                    C1: 1, C2: 1, C21: 1, C22: 1, C23: 1,
+                    D1: 1, D2: 1, D21: 1, D22: 1, D23: 1,
+                    scale_of_failure: 'Medium',
+                    consequence_to_life: 'category-2'
+                },
+
+                init() {
+                    const params = new URLSearchParams(window.location.search);
+                    this.slug = params.get('slug') || '';
+                    if (!this.slug) {
+                        window.location.href = 'inventory.html';
+                        return;
+                    }
+                    this.fetchDetails();
+                },
+
+                fetchDetails() {
+                    this.loading = true;
+                    fetch(`/api/slopes/${this.slug}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            this.slope = data.slope;
+                            if (data.slope.rating) {
+                                this.rating = { ...this.rating, ...data.slope.rating };
+                            }
+                            this.loading = false;
+                        })
+                        .catch(err => {
+                            console.error('Error fetching details:', err);
+                            this.loading = false;
+                        });
+                },
+
+                get computedScores() {
+                    if (this.loading || !this.slope) return { IS: 1, CS: 1, TS: 1, RS: 0 };
+                    
+                    const geom = this.slope.geometry || {};
+                    const feature_height = parseFloat(geom.feature_height) || 1;
+                    const type = this.slope.slope_type;
+
+                    const A1 = parseFloat(this.rating.A1) || 1;
+                    const A2 = parseFloat(this.rating.A2) || 1;
+                    const A3 = parseFloat(this.rating.A3) || 1;
+                    const A4 = parseFloat(this.rating.A4) || 1;
+                    const A5 = parseFloat(this.rating.A5) || 1;
+                    const B1 = parseFloat(this.rating.B1) || 1;
+                    const B2 = parseFloat(this.rating.B2) || 1;
+                    const C1 = parseFloat(this.rating.C1) || 1;
+                    const C2 = parseFloat(this.rating.C2) || 1;
+                    const D1 = parseFloat(this.rating.D1) || 1;
+                    const D2 = parseFloat(this.rating.D2) || 1;
+
+                    let IS = 1;
+                    let CS = 1;
+                    let TS = 1;
+                    let RS = 0;
+
+                    if (type === 'cut-type' || type === 'combine-type') {
+                        IS = A1 * A2 * A3 * A4 * A5 * B1 * B2;
+                        CS = ((C1 * C2) + (D1 * D2)) * feature_height;
+                        TS = IS * CS;
+                        RS = type === 'cut-type' ? TS * 0.063 : (TS * 0.063) + (TS * 0.027);
+                    } else if (type === 'rock-type') {
+                        IS = A1 * A2 * A3 * A4 * B1 * B2;
+                        let K = 1;
+                        if (this.rating.scale_of_failure === 'Large') K = 5;
+                        else if (this.rating.scale_of_failure === 'Medium') K = 3;
+                        CS = ((C1 * C2) + (D1 * D2)) * K;
+                        TS = IS * CS;
+                        RS = TS * 0.022;
+                    } else if (type === 'fill-type') {
+                        const C21 = parseFloat(this.rating.C21) || 1;
+                        const C22 = parseFloat(this.rating.C22) || 1;
+                        const C23 = parseFloat(this.rating.C23) || 1;
+                        const D21 = parseFloat(this.rating.D21) || 1;
+                        const D22 = parseFloat(this.rating.D22) || 1;
+                        const D23 = parseFloat(this.rating.D23) || 1;
+
+                        const IS1 = A1 * A2 * B1 * B2;
+                        const IS2 = A1 * A3 * B1 * B2;
+                        const IS3 = A1 * A4 * B1 * B2;
+
+                        const CS1 = ((C1 * C21) + (D1 * D21)) * feature_height;
+                        const CS2 = ((C1 * C22) + (D1 * D22)) * feature_height;
+                        const CS3 = ((C1 * C23) + (D1 * D23)) * feature_height;
+
+                        TS = (IS1 * CS1) + (IS2 * CS2) + (IS3 * CS3);
+                        RS = TS * 0.006;
+                        IS = '-';
+                        CS = '-';
+                    } else if (type === 'retaining-type') {
+                        IS = A1 * A2 * A3 * A4 * A5 * B1 * B2;
+                        CS = ((C1 * C2) + (D1 * D2)) * feature_height;
+                        TS = IS * CS;
+                        RS = TS * 0.027;
+                    }
+
+                    return { IS, CS, TS, RS };
+                },
+
+                submitForm() {
+                    fetch(`/api/slopes/${this.slug}/rating`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.rating)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = `detail.html?slug=${this.slug}`;
+                        }
+                    })
+                    .catch(err => console.error('Error saving rating:', err));
+                }
+            }
+        }
+    </script>
+</body>
+</html>

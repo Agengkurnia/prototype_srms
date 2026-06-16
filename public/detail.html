@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slope Details | Slope Risk Management System</title>
+    <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
+    <!-- Google Font Figtree -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Leaflet Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Tailwind CSS & Flowbite & Alpine.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Figtree', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-stone-100 font-sans antialiased text-gray-900" x-data="detailHandler()" x-init="init()">
+
+    <!-- Header Navigation -->
+    <nav class="relative z-40 w-full bg-white shadow-sm border-b border-gray-100">
+        <div class="flex flex-wrap justify-between items-center mx-auto py-3.5 px-6 max-w-7xl">
+            <a href="index.html" class="flex items-center space-x-3">
+                <div class="flex items-center">
+                    <img src="components/icons/icon-srms.svg" class="w-8 mr-2.5" alt="Logo">
+                    <p class="font-black text-sm uppercase leading-tight tracking-wider text-gray-800">
+                        Slope Risk<br><span class="text-lime-600">Management System</span>
+                    </p>
+                </div>
+            </a>
+            <div id="mega-menu-full" class="items-center justify-between font-medium hidden w-full md:flex md:w-auto md:order-1">
+                <ul class="flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 md:flex-row md:mt-0 md:border-0 bg-white items-center text-sm">
+                    <li><a href="index.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Dashboard</a></li>
+                    <li><a href="inventory.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Inventory</a></li>
+                    <li><a href="priority.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Priority</a></li>
+                    <li><a href="inspection.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Inspection</a></li>
+                    <li><a href="preservation.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Preservation</a></li>
+                    <li><a href="mitigation.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Mitigation</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Area -->
+    <div class="max-w-7xl mx-auto px-6 py-6" x-show="!loading">
+        
+        <!-- Breadcrumb Row -->
+        <div class="flex justify-between items-center mb-5 py-3 px-6 bg-white border border-gray-200 shadow-sm rounded-2xl">
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="inline-flex space-x-2 items-center">
+                    <li class="inline-flex items-center">
+                        <a href="index.html" class="text-sm font-semibold text-gray-700 hover:text-lime-600 transition">Home</a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/></svg>
+                            <a href="inventory.html" class="text-sm font-semibold text-gray-700 hover:text-lime-600 transition">Slope Inventory</a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/></svg>
+                            <span class="ms-1 text-sm font-semibold text-gray-500" x-text="slope.slope_name"></span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+            <div class="flex gap-2">
+                <a :href="'geometry.html?slug=' + slope.slug" class="text-lime-700 bg-lime-50 hover:bg-lime-100 font-bold px-4 py-2 rounded-xl text-xs shadow-sm transition">Edit Configuration</a>
+            </div>
+        </div>
+
+        <!-- Hero Section Header -->
+        <div class="relative overflow-hidden rounded-3xl bg-lime-950 p-8 text-white shadow-lg mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4" style="background-image: url('components/inventory-bg.webp'); background-size: cover; background-position: center;">
+            <div class="absolute inset-0 bg-lime-950/80 z-0"></div>
+            <div class="relative z-10 space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="bg-lime-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider" x-text="'Side ' + slope.side_of_road"></span>
+                    <span :class="{
+                        'bg-amber-600 text-white': slope.slope_type === 'cut-type',
+                        'bg-blue-600 text-white': slope.slope_type === 'fill-type',
+                        'bg-stone-600 text-white': slope.slope_type === 'rock-type',
+                        'bg-purple-600 text-white': slope.slope_type === 'retaining-type',
+                        'bg-teal-600 text-white': slope.slope_type === 'combine-type'
+                    }" class="text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider" x-text="slope.slope_type.replace('-type', '') + ' Slope'"></span>
+                </div>
+                <h1 class="text-4xl font-extrabold tracking-tight" x-text="'FEATURE NO : ' + slope.slope_name"></h1>
+                <p class="text-lime-200 text-sm font-medium" x-text="slope.location"></p>
+            </div>
+            <div class="relative z-10 flex gap-2">
+                <button @click="window.print()" class="bg-white hover:bg-lime-50 text-lime-800 font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition flex items-center">
+                    <svg class="w-4 h-4 me-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    Print Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Split Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            <!-- Left 2/3 Content Column -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Custom Pill-Style Tabs -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-2.5 flex overflow-x-auto gap-2">
+                    <button @click="activeTab = 'general'" :class="activeTab === 'general' ? 'bg-lime-600 text-white' : 'text-gray-600 hover:bg-gray-50'" class="px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap outline-none">
+                        General Info
+                    </button>
+                    <button @click="activeTab = 'geometry'" :class="activeTab === 'geometry' ? 'bg-lime-600 text-white' : 'text-gray-600 hover:bg-gray-50'" class="px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap outline-none">
+                        Geometry
+                    </button>
+                    <button @click="activeTab = 'rating'" :class="activeTab === 'rating' ? 'bg-lime-600 text-white' : 'text-gray-600 hover:bg-gray-50'" class="px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap outline-none">
+                        Rating Parameters
+                    </button>
+                    <button @click="activeTab = 'documents'" :class="activeTab === 'documents' ? 'bg-lime-600 text-white' : 'text-gray-600 hover:bg-gray-50'" class="px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap outline-none">
+                        Documents (<span x-text="documents.length">0</span>)
+                    </button>
+                    <button @click="activeTab = 'records'" :class="activeTab === 'records' ? 'bg-lime-600 text-white' : 'text-gray-600 hover:bg-gray-50'" class="px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap outline-none">
+                        Failure Records (<span x-text="records.length">0</span>)
+                    </button>
+                </div>
+
+                <!-- Tab Panels -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-6">
+                    
+                    <!-- TAB 1: GENERAL INFO -->
+                    <div x-show="activeTab === 'general'" class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">Location & Coordinates</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-50 p-4 rounded-xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase">STA Range</p>
+                                    <p class="text-base font-bold text-gray-800 mt-1" x-text="slope.sta1 + ' to ' + slope.sta2"></p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase">Latitude / Longitude</p>
+                                    <p class="text-base font-bold text-gray-800 mt-1" x-text="(slope.latitude || '-') + ', ' + (slope.longtitude || '-')"></p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase">GPS Coordinate 1</p>
+                                    <p class="text-base font-bold text-gray-800 mt-1" x-text="slope.gps1 || '-'"></p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase">GPS Coordinate 2</p>
+                                    <p class="text-base font-bold text-gray-800 mt-1" x-text="slope.gps2 || '-'"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">Visual Characteristics</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" x-show="slope.characteristic">
+                                <div class="bg-gray-50 p-4 rounded-xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase">Slope Protection</p>
+                                    <p class="text-base font-bold text-gray-800 mt-1" x-text="slope.characteristic ? slope.characteristic.slope_protection : '-'"></p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase">Surface Drainage</p>
+                                    <p class="text-base font-bold text-gray-800 mt-1" x-text="slope.characteristic ? slope.characteristic.surface_drainage_provision : '-'"></p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase">Hydrogeological settings</p>
+                                    <p class="text-base font-bold text-gray-800 mt-1" x-text="slope.characteristic ? slope.characteristic.hydrogeological_settings : '-'"></p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-xl">
+                                    <p class="text-xs text-gray-400 font-bold uppercase">Geological features</p>
+                                    <p class="text-base font-bold text-gray-800 mt-1" x-text="slope.characteristic ? slope.characteristic.geological_features : '-'"></p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-xl col-span-2">
+                                    <p class="text-xs text-gray-400 font-bold uppercase">Signs of distress</p>
+                                    <p class="text-base font-bold text-gray-800 mt-1" x-text="slope.characteristic ? slope.characteristic.signs_of_distress : '-'"></p>
+                                </div>
+                            </div>
+                            <div x-show="!slope.characteristic" class="text-sm text-gray-400 italic">No visual characteristics stored yet.</div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: GEOMETRY PARAMETERS -->
+                    <div x-show="activeTab === 'geometry'" class="space-y-6">
+                        <h3 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">Geometry Metrics</h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" x-show="slope.geometry">
+                            <template x-for="(val, key) in slope.geometry">
+                                <div class="bg-gray-50 p-4 rounded-xl flex justify-between items-center" x-show="val !== '' && val !== null && key !== 'section'">
+                                    <span class="text-xs text-gray-500 font-bold uppercase" x-text="key.replace(/_/g, ' ')"></span>
+                                    <span class="text-base font-bold text-gray-800" x-text="val"></span>
+                                </div>
+                            </template>
+                        </div>
+                        <div x-show="!slope.geometry" class="text-sm text-gray-400 italic">No geometry parameters stored yet.</div>
+                    </div>
+
+                    <!-- TAB 3: RATING PARAMETERS -->
+                    <div x-show="activeTab === 'rating'" class="space-y-6">
+                        <h3 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">Scoring Breakdown</h3>
+                        
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" x-show="slope.rating">
+                            <template x-for="(val, key) in slope.rating">
+                                <div class="bg-gray-50 p-4 rounded-xl flex flex-col items-center justify-center text-center" x-show="key !== 'consequence_to_life' && key !== 'scale_of_failure'">
+                                    <span class="text-xs text-gray-400 font-bold uppercase" x-text="'Factor ' + key"></span>
+                                    <span class="text-2xl font-black text-lime-600 mt-1" x-text="val"></span>
+                                </div>
+                            </template>
+                        </div>
+                        <div x-show="slope.rating" class="bg-lime-50/50 p-4 rounded-xl border border-lime-100 text-sm space-y-2 mt-4">
+                            <p class="font-bold text-lime-800">Metadata Scoring Settings:</p>
+                            <p class="text-gray-700">Consequence Category: <span class="font-bold" x-text="slope.rating ? slope.rating.consequence_to_life : '-'"></span></p>
+                            <p x-show="slope.rating && slope.rating.scale_of_failure" class="text-gray-700">Failure Scale Factor (K): <span class="font-bold" x-text="slope.rating ? slope.rating.scale_of_failure : '-'"></span></p>
+                        </div>
+                        <div x-show="!slope.rating" class="text-sm text-gray-400 italic">No rating scoring done yet.</div>
+                    </div>
+
+                    <!-- TAB 4: DOCUMENTS -->
+                    <div x-show="activeTab === 'documents'" class="space-y-6">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Uploaded Documents</h3>
+                            <button data-modal-target="uploadDocModal" data-modal-toggle="uploadDocModal" class="bg-lime-600 hover:bg-lime-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition">
+                                Upload File
+                            </button>
+                        </div>
+
+                        <!-- Documents List -->
+                        <div class="space-y-3" x-show="documents.length > 0">
+                            <template x-for="doc in documents" :key="doc.id">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-150">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="p-2.5 bg-red-100 text-red-700 rounded-xl">
+                                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-gray-800 text-sm" x-text="doc.original_name"></p>
+                                            <p class="text-xs text-gray-400" x-text="'Uploaded by ' + doc.uploader + ' on ' + new Date(doc.created_at).toLocaleDateString()"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button @click="deleteDoc(doc.id)" class="text-red-500 hover:bg-red-50 p-2 rounded-xl transition text-xs font-bold">Delete</button>
+                                        <a href="#" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold px-3 py-2 rounded-xl text-xs transition">Download</a>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div x-show="documents.length === 0" class="text-center py-6 text-gray-400 italic">No files or drawings uploaded yet.</div>
+                    </div>
+
+                    <!-- TAB 5: DISASTER RECORDS -->
+                    <div x-show="activeTab === 'records'" class="space-y-6">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Historical Failures / Incidents</h3>
+                            <a :href="'record-form.html?slug=' + slope.slug" class="bg-lime-600 hover:bg-lime-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition">
+                                Add Failure Record
+                            </a>
+                        </div>
+
+                        <!-- Records Timeline -->
+                        <div class="space-y-4" x-show="records.length > 0">
+                            <template x-for="rec in records" :key="rec.id">
+                                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-150 flex justify-between items-start">
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs bg-red-100 text-red-800 font-extrabold px-2.5 py-0.5 rounded-full" x-text="rec.type_of_failure"></span>
+                                            <span class="text-xs text-gray-400 font-semibold" x-text="'Date of occurrence: ' + rec.date_of_occurrence"></span >
+                                        </div>
+                                        <h4 class="text-sm font-bold text-gray-700" x-text="'Damage: ' + (rec.type_of_damage || 'None')"></h4>
+                                        <p class="text-xs text-gray-500" x-text="'Length: ' + (rec.length_of_slope_failure || 0) + 'm | Volume: ' + (rec.volume_of_fallen_debris_rocks || 0) + 'm3'"></p>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button @click="deleteRecord(rec.id)" class="text-red-500 hover:bg-red-50 p-2 rounded-xl transition text-xs font-bold">Delete</button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div x-show="records.length === 0" class="text-center py-6 text-gray-400 italic">No landslide failure incidents recorded.</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right 1/3 Summary & Map Column -->
+            <div class="space-y-6">
+                
+                <!-- Score Cards Panel -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
+                    <h3 class="font-bold text-gray-800 text-lg">Overall Hazard Assessment</h3>
+                    <div class="border-t border-gray-100 pt-2"></div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-gray-50 px-4 py-3 rounded-2xl">
+                            <div>
+                                <span class="text-xs text-gray-400 font-bold uppercase">Ranking Score (RS)</span>
+                                <h4 class="text-3xl font-black text-lime-600 mt-0.5" x-text="slope.ranking && slope.ranking.RS !== '-' ? parseFloat(slope.ranking.RS).toFixed(2) : '-'">-</h4>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-gray-50 px-4 py-3 rounded-2xl">
+                                <span class="text-xs text-gray-400 font-bold uppercase">Instability (IS)</span>
+                                <p class="text-lg font-extrabold text-gray-700 mt-0.5" x-text="slope.ranking ? slope.ranking.IS : '-'"></p>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 rounded-2xl">
+                                <span class="text-xs text-gray-400 font-bold uppercase">Consequence (CS)</span>
+                                <p class="text-lg font-extrabold text-gray-700 mt-0.5" x-text="slope.ranking ? slope.ranking.CS : '-'"></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 px-4 py-3 rounded-2xl">
+                            <span class="text-xs text-gray-400 font-bold uppercase">Total Score (TS)</span>
+                            <p class="text-xl font-extrabold text-gray-800 mt-0.5" x-text="slope.ranking ? slope.ranking.TS : '-'"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timelines Panel -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
+                    <h3 class="font-bold text-gray-800 text-lg">Inspections & Maintenance</h3>
+                    <div class="border-t border-gray-100 pt-2"></div>
+                    
+                    <div class="space-y-4 text-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="p-2 bg-amber-50 text-amber-600 rounded-xl mt-0.5">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-700">Engineer Inspection Due</h4>
+                                <p class="text-xs text-gray-400 mt-0.5" x-text="slope.engineer_inspection ? new Date(slope.engineer_inspection).toLocaleDateString() : 'Needs Configuration'"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="p-2 bg-blue-50 text-blue-600 rounded-xl mt-0.5">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-700">Maintenance Inspection Due</h4>
+                                <p class="text-xs text-gray-400 mt-0.5" x-text="slope.maintenance_inspection ? new Date(slope.maintenance_inspection).toLocaleDateString() : 'Needs Configuration'"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Leaflet Map Panel -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
+                    <h3 class="font-bold text-gray-800 text-lg">Geographical Location</h3>
+                    <div class="border-t border-gray-100 pt-2"></div>
+                    
+                    <div id="map" class="h-56 w-full rounded-2xl border border-gray-200"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Loading Screen Placeholder -->
+    <div class="flex items-center justify-center min-h-[70vh]" x-show="loading">
+        <div class="text-center space-y-3">
+            <div class="w-12 h-12 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-gray-500 font-semibold text-sm">Loading slope record details...</p>
+        </div>
+    </div>
+
+    <!-- DOCUMENT UPLOAD MODAL -->
+    <div id="uploadDocModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+            <div class="relative bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100" x-data="uploadDocHandler()">
+                <div class="bg-gradient-to-r from-lime-600 to-green-700 px-6 py-4 text-white flex justify-between items-center">
+                    <h3 class="text-lg font-bold">Upload Document</h3>
+                    <button type="button" class="text-white/80 hover:text-white bg-transparent hover:bg-white/10 rounded-lg text-sm p-1.5 ms-auto inline-flex items-center" data-modal-hide="uploadDocModal">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 14 14"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/></svg>
+                    </button>
+                </div>
+
+                <form @submit.prevent="submitDocForm()" class="p-6 space-y-4">
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Document Label / Name</label>
+                        <input type="text" x-model="docName" required placeholder="e.g. Drawing Cross-Section.pdf" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-bold text-gray-700">Uploader Name</label>
+                        <input type="text" x-model="uploader" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500 outline-none text-sm transition">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-3">
+                        <button type="button" data-modal-hide="uploadDocModal" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl text-sm transition">Cancel</button>
+                        <button type="submit" class="bg-lime-600 hover:bg-lime-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-lg hover:shadow-lime-600/30">Save File</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flowbite JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
+    <script>
+        function detailHandler() {
+            return {
+                loading: true,
+                slug: '',
+                slope: {},
+                documents: [],
+                records: [],
+                activeTab: 'general',
+                map: null,
+
+                init() {
+                    const params = new URLSearchParams(window.location.search);
+                    this.slug = params.get('slug') || '';
+                    if (!this.slug) {
+                        window.location.href = 'inventory.html';
+                        return;
+                    }
+                    this.fetchDetails();
+                },
+
+                fetchDetails() {
+                    this.loading = true;
+                    fetch(`/api/slopes/${this.slug}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            this.slope = data.slope;
+                            this.documents = data.documents;
+                            this.records = data.records;
+                            this.loading = false;
+                            
+                            // Initialize map next tick
+                            setTimeout(() => {
+                                this.initMap();
+                            }, 100);
+                        })
+                        .catch(err => {
+                            console.error('Error fetching details:', err);
+                            this.loading = false;
+                        });
+                },
+
+                initMap() {
+                    const lat = parseFloat(this.slope.latitude);
+                    const lng = parseFloat(this.slope.longtitude);
+                    
+                    if (isNaN(lat) || isNaN(lng)) {
+                        // Default Bawen coordinates
+                        this.map = L.map('map').setView([-7.2, 110.4], 10);
+                    } else {
+                        this.map = L.map('map').setView([lat, lng], 14);
+                        L.marker([lat, lng]).addTo(this.map)
+                            .bindPopup(`<b>${this.slope.slope_name}</b><br>${this.slope.location}`)
+                            .openPopup();
+                    }
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(this.map);
+                },
+
+                deleteDoc(id) {
+                    if (confirm('Delete this document?')) {
+                        fetch(`/api/documents/${id}`, { method: 'DELETE' })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) this.fetchDetails();
+                            })
+                            .catch(err => console.error(err));
+                    }
+                },
+
+                deleteRecord(id) {
+                    if (confirm('Delete this failure record?')) {
+                        fetch(`/api/records/${id}`, { method: 'DELETE' })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) this.fetchDetails();
+                            })
+                            .catch(err => console.error(err));
+                    }
+                }
+            }
+        }
+
+        function uploadDocHandler() {
+            return {
+                docName: '',
+                uploader: 'Admin User',
+                init() {
+                    const session = localStorage.getItem('user');
+                    if (session) {
+                        this.uploader = JSON.parse(session).name;
+                    }
+                },
+                submitDocForm() {
+                    const params = new URLSearchParams(window.location.search);
+                    const slug = params.get('slug');
+
+                    fetch(`/api/slopes/${slug}/documents`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            doc: this.docName,
+                            uploader: this.uploader
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Hide modal (using Flowbite utility or page reload)
+                            window.location.reload();
+                        }
+                    })
+                    .catch(err => console.error(err));
+                }
+            }
+        }
+    </script>
+</body>
+</html>
