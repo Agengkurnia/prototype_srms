@@ -22,6 +22,26 @@
             }
         }
     </script>
+    <style>
+        .kpi-card {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        .kpi-card:active {
+            transform: translateY(0);
+        }
+        @keyframes kpi-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
+            50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+        }
+        .kpi-pulse-high {
+            animation: kpi-pulse 2s infinite;
+        }
+    </style>
 </head>
 <body class="bg-stone-50 font-sans antialiased text-gray-900" x-data="portalHandler()" x-init="init()">
 
@@ -43,20 +63,15 @@
             </button>
 
             <div id="mega-menu-full" class="items-center justify-between font-medium hidden w-full md:flex md:w-auto md:order-1">
-                <ul class="flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 md:flex-row md:mt-0 md:border-0 bg-white items-center">
-                    <li><a href="#" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">What's New</a></li>
-                    <li><a href="#" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">About Us</a></li>
-                    <li>
-                        <button id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar" class="flex items-center justify-between w-full py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Document Publish <svg class="w-2.5 h-2.5 ms-2.5" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/></svg></button>
-                        <div id="dropdownNavbar" class="hidden font-normal bg-white divide-y divide-gray-100 rounded-xl shadow-lg w-44 border border-gray-100">
-                            <ul class="py-2 text-sm text-gray-700 font-semibold">
-                                <li><a href="#" class="block px-4 py-2 hover:bg-lime-50">Publish 1</a></li>
-                                <li><a href="#" class="block px-4 py-2 hover:bg-lime-50">Publish 2</a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li><a href="#" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Documents</a></li>
-                    <li class="border-l border-gray-200 h-6 mx-2 hidden md:block"></li>
+                <ul class="flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-6 md:flex-row md:mt-0 md:border-0 bg-white items-center text-sm">
+                    <li><a href="index.html" class="block py-2 px-3 text-lime-600 font-bold">Dashboard</a></li>
+                    <li><a href="inventory.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Inventory</a></li>
+                    <li><a href="priority.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Priority</a></li>
+                    <li><a href="inspection.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Inspection</a></li>
+                    <li><a href="preservation.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Preservation</a></li>
+                    <li><a href="mitigation.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Mitigation</a></li>
+                    <li><a href="slope-information.html" target="_blank" rel="noopener noreferrer" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Slope Map ↗</a></li>
+                    <li class="border-l border-gray-200 h-6 mx-1 hidden md:block"></li>
                     <li>
                         <button id="dropdownMenuIconButton" data-dropdown-toggle="dropdownDots" class="inline-flex items-center p-2 text-sm font-medium text-center rounded-xl hover:bg-gray-50 focus:outline-none transition" type="button">
                             <div class="mr-2.5 font-bold text-sm text-gray-800" x-text="userName"></div>
@@ -76,44 +91,96 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-6 py-6 space-y-6" x-show="!loading">
 
-        <!-- KPI Overview -->
+        <!-- KPI Overview (interactive filters) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4">
-                <div class="p-3 bg-lime-50 text-lime-600 rounded-xl">
+            <button type="button" @click="setRiskFilter('all')"
+                :aria-pressed="selectedRiskFilter === 'all'"
+                aria-label="Show all slopes, reset risk filter"
+                :class="selectedRiskFilter === 'all' ? 'ring-2 ring-lime-500 border-lime-300 bg-lime-50/40 shadow-md' : 'border-gray-200 hover:border-lime-200'"
+                class="kpi-card bg-white border shadow-sm rounded-2xl p-5 flex items-center space-x-4 text-left w-full">
+                <div class="p-3 bg-lime-50 text-lime-600 rounded-xl shrink-0">
                     <img src="components/icons/inventory-ico.svg" class="h-6 w-6" alt="Icon">
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Total Slopes</p>
                     <h3 class="text-2xl font-black text-gray-800" x-text="stats.totalSlopes">0</h3>
+                    <p class="text-[10px] text-gray-400 font-semibold mt-0.5">All assets · click to reset</p>
+                    <div class="w-full bg-gray-100 rounded-full h-1 mt-2">
+                        <div class="bg-lime-500 h-1 rounded-full w-full"></div>
+                    </div>
                 </div>
-            </div>
-            <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4">
-                <div class="p-3 bg-red-50 text-red-600 rounded-xl">
+            </button>
+
+            <button type="button" @click="setRiskFilter('high')"
+                :aria-pressed="selectedRiskFilter === 'high'"
+                aria-label="Filter by high risk slopes"
+                :class="[
+                    selectedRiskFilter === 'high' ? 'ring-2 ring-red-500 border-red-300 bg-red-50/40 shadow-md' : 'border-gray-200 hover:border-red-200',
+                    stats.highRiskCount > 0 ? 'kpi-pulse-high' : ''
+                ]"
+                class="kpi-card bg-white border shadow-sm rounded-2xl p-5 flex items-center space-x-4 text-left w-full">
+                <div class="p-3 bg-red-50 text-red-600 rounded-xl shrink-0">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">High Risk (RS ≥1k)</p>
                     <h3 class="text-2xl font-black text-red-600" x-text="stats.highRiskCount">0</h3>
+                    <p class="text-[10px] text-red-500/80 font-semibold mt-0.5" x-text="riskPercent('high') + '% of fleet'"></p>
+                    <div class="w-full bg-gray-100 rounded-full h-1 mt-2">
+                        <div class="bg-red-500 h-1 rounded-full transition-all duration-500" :style="'width:' + riskPercent('high') + '%'"></div>
+                    </div>
                 </div>
-            </div>
-            <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4">
-                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+            </button>
+
+            <button type="button" @click="setRiskFilter('medium')"
+                :aria-pressed="selectedRiskFilter === 'medium'"
+                aria-label="Filter by medium risk slopes"
+                :class="selectedRiskFilter === 'medium' ? 'ring-2 ring-amber-500 border-amber-300 bg-amber-50/40 shadow-md' : 'border-gray-200 hover:border-amber-200'"
+                class="kpi-card bg-white border shadow-sm rounded-2xl p-5 flex items-center space-x-4 text-left w-full">
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl shrink-0">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Medium Risk</p>
                     <h3 class="text-2xl font-black text-amber-600" x-text="stats.medRiskCount">0</h3>
+                    <p class="text-[10px] text-amber-600/80 font-semibold mt-0.5" x-text="riskPercent('medium') + '% of fleet'"></p>
+                    <div class="w-full bg-gray-100 rounded-full h-1 mt-2">
+                        <div class="bg-amber-500 h-1 rounded-full transition-all duration-500" :style="'width:' + riskPercent('medium') + '%'"></div>
+                    </div>
                 </div>
-            </div>
-            <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4">
-                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+            </button>
+
+            <button type="button" @click="setRiskFilter('low')"
+                :aria-pressed="selectedRiskFilter === 'low'"
+                aria-label="Filter by low risk slopes"
+                :class="selectedRiskFilter === 'low' ? 'ring-2 ring-emerald-500 border-emerald-300 bg-emerald-50/40 shadow-md' : 'border-gray-200 hover:border-emerald-200'"
+                class="kpi-card bg-white border shadow-sm rounded-2xl p-5 flex items-center space-x-4 text-left w-full">
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl shrink-0">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Low Risk</p>
                     <h3 class="text-2xl font-black text-emerald-600" x-text="stats.lowRiskCount">0</h3>
+                    <p class="text-[10px] text-emerald-600/80 font-semibold mt-0.5" x-text="riskPercent('low') + '% of fleet'"></p>
+                    <div class="w-full bg-gray-100 rounded-full h-1 mt-2">
+                        <div class="bg-emerald-500 h-1 rounded-full transition-all duration-500" :style="'width:' + riskPercent('low') + '%'"></div>
+                    </div>
                 </div>
-            </div>
+            </button>
+        </div>
+
+        <!-- Active filter hint -->
+        <div x-show="selectedRiskFilter !== 'all'" x-transition class="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-xs">
+            <span class="font-semibold text-gray-600">
+                Filtering schedule by:
+                <span class="font-black uppercase" :class="{
+                    'text-red-600': selectedRiskFilter === 'high',
+                    'text-amber-600': selectedRiskFilter === 'medium',
+                    'text-emerald-600': selectedRiskFilter === 'low'
+                }" x-text="selectedRiskFilter + ' risk'"></span>
+                · <span x-text="filteredSchedule().length + ' slopes shown'"></span>
+            </span>
+            <button @click="setRiskFilter('all')" class="text-lime-600 hover:text-lime-700 font-bold">Clear filter ×</button>
         </div>
 
         <!-- Module Launchpad (moved to top) -->
@@ -234,34 +301,37 @@
 
         <!-- Risk summary + asset types -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
-                <h4 class="font-bold text-gray-800 text-sm">Slope Hazard Stratification</h4>
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4" :class="selectedRiskFilter !== 'all' ? 'ring-1 ring-lime-200' : ''">
+                <div class="flex justify-between items-center">
+                    <h4 class="font-bold text-gray-800 text-sm">Slope Hazard Stratification</h4>
+                    <span x-show="selectedRiskFilter !== 'all'" class="text-[10px] font-bold text-lime-600 bg-lime-50 px-2 py-0.5 rounded-full uppercase" x-text="'Filtered: ' + selectedRiskFilter"></span>
+                </div>
                 <div class="space-y-3.5">
-                    <div>
+                    <div @click="setRiskFilter('high')" class="rounded-xl p-2 -mx-2 transition cursor-pointer" :class="selectedRiskFilter === 'high' ? 'bg-red-50 ring-1 ring-red-200' : (selectedRiskFilter === 'all' ? 'hover:bg-stone-50' : 'opacity-40')">
                         <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
                             <span>High Risk (RS ≥ 1,000)</span>
                             <span x-text="stats.highRiskCount + ' Slopes'"></span>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-red-500 h-2 rounded-full" :style="'width: ' + ((stats.highRiskCount / stats.totalSlopes) * 100) + '%'"></div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5">
+                            <div class="bg-red-500 h-2.5 rounded-full transition-all duration-500" :class="selectedRiskFilter === 'high' || selectedRiskFilter === 'all' ? '' : 'opacity-50'" :style="'width: ' + ((stats.highRiskCount / stats.totalSlopes) * 100) + '%'"></div>
                         </div>
                     </div>
-                    <div>
+                    <div @click="setRiskFilter('medium')" class="rounded-xl p-2 -mx-2 transition cursor-pointer" :class="selectedRiskFilter === 'medium' ? 'bg-amber-50 ring-1 ring-amber-200' : (selectedRiskFilter === 'all' ? 'hover:bg-stone-50' : 'opacity-40')">
                         <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
                             <span>Medium Risk (100 - 999)</span>
                             <span x-text="stats.medRiskCount + ' Slopes'"></span>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-amber-500 h-2 rounded-full" :style="'width: ' + ((stats.medRiskCount / stats.totalSlopes) * 100) + '%'"></div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5">
+                            <div class="bg-amber-500 h-2.5 rounded-full transition-all duration-500" :class="selectedRiskFilter === 'medium' || selectedRiskFilter === 'all' ? '' : 'opacity-50'" :style="'width: ' + ((stats.medRiskCount / stats.totalSlopes) * 100) + '%'"></div>
                         </div>
                     </div>
-                    <div>
+                    <div @click="setRiskFilter('low')" class="rounded-xl p-2 -mx-2 transition cursor-pointer" :class="selectedRiskFilter === 'low' ? 'bg-emerald-50 ring-1 ring-emerald-200' : (selectedRiskFilter === 'all' ? 'hover:bg-stone-50' : 'opacity-40')">
                         <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
                             <span>Low Risk (RS &lt; 100)</span>
                             <span x-text="stats.lowRiskCount + ' Slopes'"></span>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-emerald-500 h-2 rounded-full" :style="'width: ' + ((stats.lowRiskCount / stats.totalSlopes) * 100) + '%'"></div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5">
+                            <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" :class="selectedRiskFilter === 'low' || selectedRiskFilter === 'all' ? '' : 'opacity-50'" :style="'width: ' + ((stats.lowRiskCount / stats.totalSlopes) * 100) + '%'"></div>
                         </div>
                     </div>
                 </div>
@@ -289,73 +359,75 @@
             </div>
         </div>
 
-        <!-- Schedule Inspection + Quote Banner -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
-                <div class="flex justify-between items-center border-b border-gray-100 pb-3 flex-wrap gap-3">
-                    <div>
-                        <h4 class="font-extrabold text-gray-800 text-base">Upcoming Inspection Schedule</h4>
-                        <p class="text-xs text-gray-400 font-semibold">Nearest engineer inspection and routine maintenance timelines</p>
-                    </div>
-                    <a href="inspection.html" class="text-xs bg-blue-100 text-blue-800 font-bold px-3 py-1.5 rounded-full hover:bg-blue-200 transition">
-                        View All Schedules →
-                    </a>
-                </div>
+        <!-- Core Philosophy — horizontal split banner -->
+        <div class="rounded-3xl overflow-hidden shadow-lg border border-lime-900/10 flex flex-col md:flex-row min-h-[200px] md:min-h-[220px]">
+            <div class="relative flex-1 bg-lime-950 px-7 py-7 md:px-10 md:py-8 flex flex-col justify-center">
+                <div class="absolute top-3 left-5 text-lime-500/15 text-7xl font-serif leading-none select-none pointer-events-none">"</div>
+                <span class="relative z-10 inline-flex self-start bg-lime-600/90 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Core Philosophy</span>
+                <blockquote class="relative z-10 mt-4 text-[15px] md:text-lg font-bold italic text-white/95 leading-relaxed max-w-2xl">
+                    Engineering is the professional art of applying science to the optimum conversion of natural resources to the benefit of man.
+                </blockquote>
+                <cite class="relative z-10 mt-4 text-sm font-semibold text-lime-400 not-italic">— Ralph J. Smith</cite>
+                <p class="relative z-10 mt-2 text-[10px] text-lime-500/70 font-medium">Field engineering at the heart of slope safety</p>
+            </div>
+            <div class="relative md:w-[42%] lg:w-[38%] min-h-[160px] md:min-h-0 shrink-0 bg-cover bg-no-repeat" style="background-image: url('components/bg2.webp'); background-position: right center;">
+                <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-transparent via-transparent to-lime-950/25 md:to-lime-950/40"></div>
+            </div>
+        </div>
 
-                <div class="overflow-x-auto border border-gray-100 rounded-2xl">
-                    <table class="w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-600 uppercase bg-stone-50 border-b border-gray-100 font-bold">
-                            <tr>
-                                <th scope="col" class="px-5 py-3">Slope</th>
-                                <th scope="col" class="px-5 py-3">Category</th>
-                                <th scope="col" class="px-5 py-3">Next Engineer Inspection</th>
-                                <th scope="col" class="px-5 py-3">Next Maintenance</th>
-                                <th scope="col" class="px-5 py-3 text-right">RS Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template x-for="item in stats.upcomingInspections" :key="item.slug">
-                                <tr class="border-b border-gray-100 hover:bg-stone-50/70 transition">
-                                    <td class="px-5 py-3.5">
-                                        <div class="font-extrabold text-gray-800" x-text="item.slope_name"></div>
-                                        <div class="text-[10px] text-gray-400 font-semibold truncate max-w-xs" x-text="item.location"></div>
-                                    </td>
-                                    <td class="px-5 py-3.5">
-                                        <span class="inline-block px-2 py-0.5 text-[10px] font-bold bg-stone-100 text-stone-700 rounded-full" x-text="item.consequence_to_life.replace('category-', 'Cat. ')"></span>
-                                    </td>
-                                    <td class="px-5 py-3.5">
-                                        <div class="font-bold text-gray-700 text-xs" x-text="formatDate(item.engineer_inspection)"></div>
-                                        <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(item.engineer_inspection)" x-text="daysRemaining(item.engineer_inspection)"></div>
-                                    </td>
-                                    <td class="px-5 py-3.5">
-                                        <div class="font-bold text-gray-700 text-xs" x-text="formatDate(item.maintenance_inspection)"></div>
-                                        <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(item.maintenance_inspection)" x-text="daysRemaining(item.maintenance_inspection)"></div>
-                                    </td>
-                                    <td class="px-5 py-3.5 text-right">
-                                        <span class="font-black text-xs"
-                                              :class="item.rs >= 1000 ? 'text-red-600' : (item.rs >= 100 ? 'text-amber-600' : 'text-emerald-600')"
-                                              x-text="item.rs.toFixed(2)"></span>
-                                    </td>
-                                </tr>
-                            </template>
-                            <tr x-show="!stats.upcomingInspections || stats.upcomingInspections.length === 0">
-                                <td colspan="5" class="text-center py-8 text-gray-400 italic">No inspection schedules found.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- Upcoming Inspection Schedule -->
+        <div id="schedule-section" class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-3 flex-wrap gap-3">
+                <div>
+                    <h4 class="font-extrabold text-gray-800 text-base">Upcoming Inspection Schedule</h4>
+                    <p class="text-xs text-gray-400 font-semibold">Click KPI cards or stratification bars to filter · nearest inspection timelines</p>
                 </div>
+                <a href="inspection.html" class="text-xs bg-blue-100 text-blue-800 font-bold px-3 py-1.5 rounded-full hover:bg-blue-200 transition">
+                    View All Schedules →
+                </a>
             </div>
 
-            <!-- Core Philosophy Quote Banner -->
-            <div class="lg:col-span-1 relative overflow-hidden rounded-3xl bg-lime-950 p-6 text-white shadow-lg flex flex-col justify-between min-h-[280px]" style="background-image: url('components/bg2.webp'); background-size: cover; background-position: center;">
-                <div class="absolute inset-0 bg-lime-950/70 z-0"></div>
-                <div class="relative z-10 space-y-3">
-                    <span class="inline-block bg-lime-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Core Philosophy</span>
-                    <blockquote class="text-sm font-extrabold italic leading-relaxed">
-                        "Engineering is the professional art of applying science to the optimum conversion of natural resources to the benefit of man."
-                    </blockquote>
-                    <cite class="block text-[11px] font-semibold text-lime-300 not-italic">— Ralph J. Smith</cite>
-                </div>
+            <div class="overflow-x-auto border border-gray-100 rounded-2xl">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-600 uppercase bg-stone-50 border-b border-gray-100 font-bold">
+                        <tr>
+                            <th scope="col" class="px-5 py-3">Slope</th>
+                            <th scope="col" class="px-5 py-3">Category</th>
+                            <th scope="col" class="px-5 py-3">Next Engineer Inspection</th>
+                            <th scope="col" class="px-5 py-3">Next Maintenance</th>
+                            <th scope="col" class="px-5 py-3 text-right">RS Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="item in filteredSchedule()" :key="item.slug">
+                            <tr class="border-b border-gray-100 hover:bg-stone-50/70 transition cursor-pointer" @click="window.location.href='detail.html?slug=' + item.slug">
+                                <td class="px-5 py-3.5">
+                                    <div class="font-extrabold text-gray-800" x-text="item.slope_name"></div>
+                                    <div class="text-[10px] text-gray-400 font-semibold truncate max-w-xs" x-text="item.location"></div>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <span class="inline-block px-2 py-0.5 text-[10px] font-bold bg-stone-100 text-stone-700 rounded-full" x-text="item.consequence_to_life.replace('category-', 'Cat. ')"></span>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <div class="font-bold text-gray-700 text-xs" x-text="formatDate(item.engineer_inspection)"></div>
+                                    <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(item.engineer_inspection)" x-text="daysRemaining(item.engineer_inspection)"></div>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <div class="font-bold text-gray-700 text-xs" x-text="formatDate(item.maintenance_inspection)"></div>
+                                    <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(item.maintenance_inspection)" x-text="daysRemaining(item.maintenance_inspection)"></div>
+                                </td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <span class="font-black text-xs"
+                                          :class="item.rs >= 1000 ? 'text-red-600' : (item.rs >= 100 ? 'text-amber-600' : 'text-emerald-600')"
+                                          x-text="item.rs.toFixed(2)"></span>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="filteredSchedule().length === 0">
+                            <td colspan="5" class="text-center py-8 text-gray-400 italic">No slopes match this risk filter.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -377,6 +449,8 @@
                 userName: 'Admin User',
                 loading: true,
                 stats: {},
+                scheduleSlopes: [],
+                selectedRiskFilter: 'all',
 
                 init() {
                     const session = localStorage.getItem('user');
@@ -390,16 +464,56 @@
                 },
 
                 fetchTelemetry() {
-                    fetch('/api/dashboard/stats')
-                        .then(res => res.json())
-                        .then(data => {
+                    Promise.all([
+                        fetch('/api/dashboard/stats').then(res => res.json()),
+                        fetch('/api/slopes?limit=500').then(res => res.json())
+                    ])
+                        .then(([data, slopesRes]) => {
                             this.stats = data;
+                            this.scheduleSlopes = (slopesRes.slopes || []).map(s => ({
+                                slope_name: s.slope_name,
+                                slug: s.slug,
+                                location: s.location,
+                                engineer_inspection: s.engineer_inspection,
+                                maintenance_inspection: s.maintenance_inspection,
+                                consequence_to_life: (s.rating && s.rating.consequence_to_life) || 'category-2',
+                                rs: s.ranking && s.ranking.RS !== '-' ? parseFloat(s.ranking.RS) : 0
+                            })).sort((a, b) => new Date(a.engineer_inspection) - new Date(b.engineer_inspection));
                             this.loading = false;
                         })
                         .catch(err => {
                             console.error('Telemetry fetch error:', err);
                             this.loading = false;
                         });
+                },
+
+                setRiskFilter(level) {
+                    this.selectedRiskFilter = this.selectedRiskFilter === level && level !== 'all' ? 'all' : level;
+                    if (level !== 'all') {
+                        setTimeout(() => {
+                            document.getElementById('schedule-section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }, 100);
+                    }
+                },
+
+                filteredSchedule() {
+                    let list = this.scheduleSlopes;
+                    if (this.selectedRiskFilter === 'high') {
+                        list = list.filter(i => i.rs >= 1000);
+                    } else if (this.selectedRiskFilter === 'medium') {
+                        list = list.filter(i => i.rs >= 100 && i.rs < 1000);
+                    } else if (this.selectedRiskFilter === 'low') {
+                        list = list.filter(i => i.rs < 100);
+                    }
+                    return list.slice(0, this.selectedRiskFilter === 'all' ? 8 : 50);
+                },
+
+                riskPercent(level) {
+                    const total = this.stats.totalSlopes || 1;
+                    if (level === 'high') return ((this.stats.highRiskCount / total) * 100).toFixed(1);
+                    if (level === 'medium') return ((this.stats.medRiskCount / total) * 100).toFixed(1);
+                    if (level === 'low') return ((this.stats.lowRiskCount / total) * 100).toFixed(1);
+                    return '100.0';
                 },
 
                 formatDate(dateStr) {
