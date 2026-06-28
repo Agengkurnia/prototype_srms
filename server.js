@@ -8,20 +8,37 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Vercel Compatibility Settings
-const isVercel = !!process.env.VERCEL;
+const isVercel = !!(process.env.VERCEL || process.env.VERCEL_ENV);
 const DB_PATH = isVercel ? path.join('/tmp', 'db.json') : path.join(__dirname, 'db.json');
 const UPLOAD_DIR = isVercel ? path.join('/tmp', 'uploads') : path.join(__dirname, 'public', 'uploads');
 
-// Initialize DB and Upload Dir for Vercel / Local
-if (isVercel) {
-  if (!fs.existsSync(DB_PATH)) {
-    const srcDB = path.join(__dirname, 'db.json');
+const EMPTY_DB = {
+  slopes: [],
+  documents: [],
+  records: [],
+  inspections: [],
+  maintenances: [],
+  preservations: [],
+  mitigations: []
+};
+
+function ensureDB() {
+  if (fs.existsSync(DB_PATH)) return;
+  const srcDB = path.join(__dirname, 'db.json');
+  try {
     if (fs.existsSync(srcDB)) {
       fs.copyFileSync(srcDB, DB_PATH);
     } else {
-      fs.writeFileSync(DB_PATH, JSON.stringify({ slopes: [], records: [], inspections: [], maintenances: [], preservations: [], mitigations: [] }), 'utf8');
+      fs.writeFileSync(DB_PATH, JSON.stringify(EMPTY_DB, null, 2), 'utf8');
     }
+  } catch (err) {
+    console.error('ensureDB failed:', err);
+    fs.writeFileSync(DB_PATH, JSON.stringify(EMPTY_DB, null, 2), 'utf8');
   }
+}
+
+if (isVercel) {
+  ensureDB();
 }
 
 // Ensure upload directory exists (will succeed in /tmp or local)
@@ -51,14 +68,32 @@ const upload = multer({ storage });
 
 // Helper to read DB
 function readDB() {
-  const raw = fs.readFileSync(DB_PATH, 'utf8');
-  return JSON.parse(raw);
+  ensureDB();
+  try {
+    const raw = fs.readFileSync(DB_PATH, 'utf8');
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error('readDB failed:', err);
+    writeDB(EMPTY_DB);
+    return { ...EMPTY_DB };
+  }
 }
 
 // Helper to write DB
 function writeDB(data) {
+  ensureDB();
   fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
 }
+
+// Health check (useful for Vercel debugging)
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    vercel: isVercel,
+    dbExists: fs.existsSync(DB_PATH),
+    dbPath: isVercel ? '/tmp/db.json' : 'local'
+  });
+});
 
 // GET all slopes with search & filter
 app.get('/api/slopes', (req, res) => {
@@ -535,7 +570,7 @@ app.post('/api/slopes/:slug/documents', upload.single('doc_file'), (req, res) =>
   const uploader = req.body.uploader || 'Admin User';
 
   const newDoc = {
-    id: db.documents.length ? Math.max(...db.documents.map(d => d.id)) + 1 : 1,
+    id: (db.documents && db.documents.length) ? Math.max(...db.documents.map(d => d.id)) + 1 : 1,
     file_name: original_name,
     slug,
     direction: req.file ? req.file.filename : 'doc_mock.pdf',
