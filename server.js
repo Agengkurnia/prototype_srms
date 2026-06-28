@@ -184,6 +184,22 @@ app.get('/api/dashboard/stats', (req, res) => {
     rs: s.ranking && s.ranking.RS !== '-' ? parseFloat(s.ranking.RS) : 0
   }));
 
+  // Upcoming inspection schedules (sorted by nearest engineer inspection date)
+  const upcomingInspections = slopes
+    .filter(s => s.engineer_inspection)
+    .map(s => ({
+      slope_name: s.slope_name,
+      slug: s.slug,
+      location: s.location,
+      side_of_road: s.side_of_road,
+      engineer_inspection: s.engineer_inspection,
+      maintenance_inspection: s.maintenance_inspection,
+      consequence_to_life: (s.rating && s.rating.consequence_to_life) || 'category-2',
+      rs: s.ranking && s.ranking.RS !== '-' ? parseFloat(s.ranking.RS) : 0
+    }))
+    .sort((a, b) => new Date(a.engineer_inspection) - new Date(b.engineer_inspection))
+    .slice(0, 8);
+
   // Calculate mitigation costs
   let totalMitigationCost = 0;
   mitigations.forEach(m => {
@@ -201,6 +217,7 @@ app.get('/api/dashboard/stats', (req, res) => {
     typeCounts,
     highestRiskSlope,
     recentRecords,
+    upcomingInspections,
     mapMarkers,
     sideARisk,
     sideBRisk,

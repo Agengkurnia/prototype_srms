@@ -34,6 +34,7 @@
             color: #65a30d;
         }
     </style>
+    <script src="api-helper.js"></script>
 </head>
 <body class="bg-stone-50 font-sans antialiased text-gray-900" x-data="inspectionHandler()" x-init="init()">
 
@@ -182,9 +183,11 @@
                                 </td>
                                 <td class="px-5 py-3.5">
                                     <div class="font-bold text-gray-700" x-text="s.engineer_inspection ? formatDate(s.engineer_inspection) : 'Not Inspected'"></div>
+                                    <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(s.engineer_inspection)" x-text="daysRemaining(s.engineer_inspection)"></div>
                                 </td>
                                 <td class="px-5 py-3.5">
                                     <div class="font-bold text-gray-700" x-text="s.maintenance_inspection ? formatDate(s.maintenance_inspection) : 'Not Inspected'"></div>
+                                    <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(s.maintenance_inspection)" x-text="daysRemaining(s.maintenance_inspection)"></div>
                                 </td>
                                 <td class="px-5 py-3.5 text-right space-x-2">
                                     <a :href="'detail.html?slug=' + s.slug + '&tab=rating'" class="text-lime-600 hover:text-lime-700 font-bold text-xs hover:underline">Inspect (CRUD)</a>
@@ -406,6 +409,34 @@
                     if (!dateStr) return '-';
                     const d = new Date(dateStr);
                     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                },
+
+                daysRemaining(dateStr) {
+                    if (!dateStr) return '';
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const target = new Date(dateStr);
+                    target.setHours(0, 0, 0, 0);
+                    const days = Math.round((target - today) / (1000 * 60 * 60 * 24));
+                    if (days < 0) {
+                        const overdue = Math.abs(days);
+                        return overdue === 1 ? '1 day overdue' : `${overdue} days overdue`;
+                    }
+                    if (days === 0) return 'Today';
+                    if (days === 1) return '1 day left';
+                    return `${days} days left`;
+                },
+
+                daysRemainingClass(dateStr) {
+                    if (!dateStr) return 'text-gray-400';
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const target = new Date(dateStr);
+                    target.setHours(0, 0, 0, 0);
+                    const days = Math.round((target - today) / (1000 * 60 * 60 * 24));
+                    if (days < 0) return 'text-red-500';
+                    if (days <= 30) return 'text-amber-600';
+                    return 'text-gray-400';
                 },
 
                 logout() {

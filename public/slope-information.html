@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slope Information Map | Slope Risk Management System</title>
+    <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Figtree', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .pulse-pin-red {
+            background: #ef4444;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: pulse 1.8s infinite;
+            cursor: pointer;
+        }
+        .pulse-pin-amber {
+            background: #f59e0b;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+            animation: pulse 1.8s infinite;
+            cursor: pointer;
+        }
+        .pulse-pin-green {
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 1.8s infinite;
+            cursor: pointer;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .map-label {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 1px 4px;
+            font-size: 9px;
+            font-weight: 800;
+            color: #1e293b;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+        }
+        .leaflet-tooltip-top.map-label::before {
+            border-top-color: rgba(255, 255, 255, 0.95);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 font-sans antialiased text-gray-900" x-data="slopeInfoHandler()" x-init="init()">
+
+    <nav class="relative z-40 w-full bg-white shadow-sm border-b border-gray-100">
+        <div class="flex flex-wrap justify-between items-center mx-auto py-3.5 px-6 max-w-7xl">
+            <a href="index.html" class="flex items-center space-x-3">
+                <div class="flex items-center">
+                    <img src="components/icons/icon-srms.svg" class="w-8 mr-2.5" alt="Logo">
+                    <p class="font-black text-sm uppercase leading-tight tracking-wider text-gray-800">
+                        Slope Risk<br><span class="text-lime-600">Management System</span>
+                    </p>
+                </div>
+            </a>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider">Slope Information</span>
+                <a href="index.html" class="text-xs font-bold text-gray-600 hover:text-lime-600 transition">← Back to Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-6 py-6 space-y-4" x-show="!loading">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-3">
+            <div>
+                <h1 class="text-2xl font-black text-gray-800 tracking-tight">Interactive Slope Information Map</h1>
+                <p class="text-xs text-gray-400 font-semibold mt-1">Click any slope marker to open slope details in a new tab</p>
+            </div>
+            <div class="flex gap-3 text-[10px] font-bold text-gray-600">
+                <span class="flex items-center"><span class="w-2.5 h-2.5 pulse-pin-red inline-block me-1"></span> High Risk</span>
+                <span class="flex items-center"><span class="w-2.5 h-2.5 pulse-pin-amber inline-block me-1"></span> Medium</span>
+                <span class="flex items-center"><span class="w-2.5 h-2.5 pulse-pin-green inline-block me-1"></span> Low</span>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
+            <div id="slopeMap" class="h-[calc(100vh-220px)] min-h-[480px] w-full rounded-2xl border border-gray-100 relative z-10"></div>
+        </div>
+    </div>
+
+    <div class="flex items-center justify-center min-h-screen bg-stone-50" x-show="loading">
+        <div class="text-center space-y-3">
+            <div class="w-12 h-12 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-gray-500 font-semibold text-sm">Loading slope map...</p>
+        </div>
+    </div>
+
+    <script>
+        function slopeInfoHandler() {
+            return {
+                loading: true,
+                map: null,
+                markers: [],
+
+                init() {
+                    fetch('/api/dashboard/stats')
+                        .then(res => res.json())
+                        .then(data => {
+                            this.loading = false;
+                            setTimeout(() => this.initMap(data.mapMarkers || []), 100);
+                        })
+                        .catch(err => {
+                            console.error('Map data error:', err);
+                            this.loading = false;
+                        });
+                },
+
+                initMap(mapMarkers) {
+                    this.map = L.map('slopeMap').setView([-7.02, 110.41], 13);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(this.map);
+
+                    const coords = [];
+
+                    mapMarkers.forEach(m => {
+                        const lat = parseFloat(m.latitude);
+                        const lng = parseFloat(m.longtitude);
+                        if (isNaN(lat) || isNaN(lng)) return;
+
+                        coords.push([lat, lng]);
+
+                        let markerClass = 'pulse-pin-green';
+                        if (m.rs >= 1000) markerClass = 'pulse-pin-red';
+                        else if (m.rs >= 100) markerClass = 'pulse-pin-amber';
+
+                        const customIcon = L.divIcon({
+                            className: markerClass,
+                            iconSize: [14, 14],
+                            popupAnchor: [0, -5]
+                        });
+
+                        const detailUrl = 'detail.html?slug=' + m.slug;
+                        const popupHtml = `
+                            <div class="text-gray-900 font-sans p-1 min-w-[160px]">
+                                <p class="font-extrabold text-sm text-lime-700">${m.slope_name}</p>
+                                <p class="text-xs font-semibold text-gray-500">${(m.slope_type || '').replace('-type', '').toUpperCase()} Slope</p>
+                                <p class="text-[10px] text-gray-400 mt-1">${m.location}</p>
+                                <div class="flex justify-between items-center mt-2 border-t border-gray-100 pt-1.5">
+                                    <span class="text-[10px] font-bold text-gray-500">RS Score:</span>
+                                    <span class="font-black text-xs text-lime-600">${parseFloat(m.rs || 0).toFixed(2)}</span>
+                                </div>
+                                <a href="${detailUrl}" target="_blank" rel="noopener noreferrer"
+                                   class="block mt-2 text-center bg-lime-600 hover:bg-lime-700 text-white font-bold text-[10px] py-1.5 rounded transition">
+                                    Open Details ↗
+                                </a>
+                            </div>
+                        `;
+
+                        const marker = L.marker([lat, lng], { icon: customIcon })
+                            .addTo(this.map)
+                            .bindPopup(popupHtml)
+                            .bindTooltip(m.slope_name, {
+                                permanent: true,
+                                direction: 'top',
+                                offset: [0, -10],
+                                className: 'map-label'
+                            });
+
+                        marker.on('click', () => {
+                            window.open(detailUrl, '_blank', 'noopener,noreferrer');
+                        });
+
+                        this.markers.push(marker);
+                    });
+
+                    if (coords.length > 0) {
+                        this.map.fitBounds(L.latLngBounds(coords), { padding: [50, 50], maxZoom: 13 });
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

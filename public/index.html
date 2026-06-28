@@ -5,14 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telemetry Dashboard | Slope Risk Management System</title>
     <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
-    <!-- Google Font Figtree -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Leaflet Map CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Tailwind CSS & Flowbite & Alpine.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -27,56 +22,6 @@
             }
         }
     </script>
-    <style>
-        /* Pulse Animation for Map Pins */
-        .pulse-pin-red {
-            background: #ef4444;
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            animation: pulse 1.8s infinite;
-        }
-        .pulse-pin-amber {
-            background: #f59e0b;
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-            animation: pulse 1.8s infinite;
-        }
-        .pulse-pin-green {
-            background: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            animation: pulse 1.8s infinite;
-        }
-        @keyframes pulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            }
-            70% {
-                transform: scale(1.1);
-                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-            }
-        }
-        /* Map Label Styling */
-        .map-label {
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            padding: 1px 4px;
-            font-size: 9px;
-            font-weight: 800;
-            color: #1e293b;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-            white-space: nowrap;
-        }
-        .leaflet-tooltip-top.map-label::before {
-            border-top-color: rgba(255, 255, 255, 0.95);
-        }
-    </style>
 </head>
 <body class="bg-stone-50 font-sans antialiased text-gray-900" x-data="portalHandler()" x-init="init()">
 
@@ -91,7 +36,7 @@
                     </p>
                 </div>
             </a>
-            
+
             <button data-collapse-toggle="mega-menu-full" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none" aria-controls="mega-menu-full" aria-expanded="false">
                 <span class="sr-only">Open main menu</span>
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 17 14"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/></svg>
@@ -112,7 +57,6 @@
                     </li>
                     <li><a href="#" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Documents</a></li>
                     <li class="border-l border-gray-200 h-6 mx-2 hidden md:block"></li>
-                    <!-- User Account Dropdown -->
                     <li>
                         <button id="dropdownMenuIconButton" data-dropdown-toggle="dropdownDots" class="inline-flex items-center p-2 text-sm font-medium text-center rounded-xl hover:bg-gray-50 focus:outline-none transition" type="button">
                             <div class="mr-2.5 font-bold text-sm text-gray-800" x-text="userName"></div>
@@ -129,13 +73,12 @@
         </div>
     </nav>
 
-    <!-- Main Content Wrapper -->
+    <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-6 py-6 space-y-6" x-show="!loading">
 
-        <!-- Top Overview Numbers Grid -->
+        <!-- KPI Overview -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <!-- Total Assets -->
-            <div @click="focusMapOnRisk('all')" :class="selectedRiskFilter === 'all' ? 'ring-2 ring-lime-500 bg-lime-50/10' : ''" class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4 cursor-pointer hover:shadow-md transition">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4">
                 <div class="p-3 bg-lime-50 text-lime-600 rounded-xl">
                     <img src="components/icons/inventory-ico.svg" class="h-6 w-6" alt="Icon">
                 </div>
@@ -144,9 +87,7 @@
                     <h3 class="text-2xl font-black text-gray-800" x-text="stats.totalSlopes">0</h3>
                 </div>
             </div>
-
-            <!-- High Risk Slopes -->
-            <div @click="focusMapOnRisk('high')" :class="selectedRiskFilter === 'high' ? 'ring-2 ring-red-500 bg-red-50/10' : ''" class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4 cursor-pointer hover:shadow-md transition">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4">
                 <div class="p-3 bg-red-50 text-red-600 rounded-xl">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
@@ -155,9 +96,7 @@
                     <h3 class="text-2xl font-black text-red-600" x-text="stats.highRiskCount">0</h3>
                 </div>
             </div>
-
-            <!-- Medium Risk Slopes -->
-            <div @click="focusMapOnRisk('medium')" :class="selectedRiskFilter === 'medium' ? 'ring-2 ring-amber-500 bg-amber-50/10' : ''" class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4 cursor-pointer hover:shadow-md transition">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4">
                 <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
@@ -166,9 +105,7 @@
                     <h3 class="text-2xl font-black text-amber-600" x-text="stats.medRiskCount">0</h3>
                 </div>
             </div>
-
-            <!-- Low Risk Slopes -->
-            <div @click="focusMapOnRisk('low')" :class="selectedRiskFilter === 'low' ? 'ring-2 ring-emerald-500 bg-emerald-50/10' : ''" class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4 cursor-pointer hover:shadow-md transition">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4">
                 <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
@@ -179,334 +116,259 @@
             </div>
         </div>
 
-        <!-- Telemetry Main Grid: Map & Details column split -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Left 2/3: Live Geo-Risk Map -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Map Card -->
-                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h3 class="font-extrabold text-gray-800 text-lg">Interactive Risk Telemetry Map</h3>
-                            <p class="text-xs text-gray-400 font-medium">Visualizing geographic coordinates and hazard ratings for toll highway assets</p>
+        <!-- Module Launchpad (moved to top) -->
+        <div class="space-y-4">
+            <h3 class="font-extrabold text-gray-800 text-lg uppercase tracking-wider border-b border-gray-150 pb-2">Interactive Management Modules</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+
+                <a href="inventory.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-lime-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/inventory-ico.svg" class="h-7 w-7" alt="Inventory">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-lime-700 bg-lime-50 px-2 py-1 rounded-full uppercase tracking-wider">Inventory</span>
                         </div>
-                        <div class="flex gap-2 text-[10px] font-bold text-gray-600">
-                            <span class="flex items-center"><span class="w-2.5 h-2.5 pulse-pin-red inline-block me-1"></span> High</span>
-                            <span class="flex items-center"><span class="w-2.5 h-2.5 pulse-pin-amber inline-block me-1"></span> Med</span>
-                            <span class="flex items-center"><span class="w-2.5 h-2.5 pulse-pin-green inline-block me-1"></span> Low</span>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-lime-600 transition">Slope Inventory</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Complete database of all managed slopes.</p>
                         </div>
                     </div>
-                    <!-- Map Container -->
-                    <div id="dashboardMap" class="h-[430px] w-full rounded-2xl border border-gray-150 relative z-10"></div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        Total: <span class="font-black text-gray-900" x-text="stats.totalSlopes">0</span>
+                    </div>
+                </a>
+
+                <a href="priority.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-red-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/management-ico.svg" class="h-7 w-7" alt="Priority">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-red-700 bg-red-50 px-2 py-1 rounded-full uppercase tracking-wider">Priority</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-red-600 transition">Slope Priority</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Rank slopes by risk and urgency.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        High Risk: <span class="font-black text-red-600" x-text="stats.highRiskCount">0</span>
+                    </div>
+                </a>
+
+                <a href="inspection.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-blue-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/inspection-ico.svg" class="h-7 w-7" alt="Inspection">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-1 rounded-full uppercase tracking-wider">Surveys</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition">Inspection</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Track inspections and maintenance logs.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        Logs: <span class="font-black text-blue-600" x-text="stats.totalMaintenances">0</span>
+                    </div>
+                </a>
+
+                <a href="preservation.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-teal-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/preservation-ico.svg" class="h-7 w-7" alt="Preservation">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-teal-700 bg-teal-50 px-2 py-1 rounded-full uppercase tracking-wider">Upgrades</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-teal-600 transition">Slope Preservation</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Plan preservation and structural works.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        Upgrades: <span class="font-black text-teal-600" x-text="stats.totalPreservations">0</span>
+                    </div>
+                </a>
+
+                <a href="mitigation.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-amber-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/mitigation-ico.svg" class="h-7 w-7" alt="Mitigation">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-2 py-1 rounded-full uppercase tracking-wider">Budget</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-amber-600 transition">Mitigation Budget</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Calculate mitigation costs and proposals.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        Plans: <span class="font-black text-amber-600" x-text="stats.totalMitigations">0</span>
+                    </div>
+                </a>
+
+                <a href="slope-information.html" target="_blank" rel="noopener noreferrer" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group ring-1 ring-transparent hover:ring-lime-200">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-indigo-50 p-3 group-hover:scale-105 transition duration-300">
+                                <svg class="h-7 w-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-indigo-700 bg-indigo-50 px-2 py-1 rounded-full uppercase tracking-wider">Map</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition">Slope Information</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Geographic map of all slope assets. Opens in new tab.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-[10px] font-bold text-indigo-600">
+                        Open Map ↗
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Risk summary + asset types -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
+                <h4 class="font-bold text-gray-800 text-sm">Slope Hazard Stratification</h4>
+                <div class="space-y-3.5">
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                            <span>High Risk (RS ≥ 1,000)</span>
+                            <span x-text="stats.highRiskCount + ' Slopes'"></span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2">
+                            <div class="bg-red-500 h-2 rounded-full" :style="'width: ' + ((stats.highRiskCount / stats.totalSlopes) * 100) + '%'"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                            <span>Medium Risk (100 - 999)</span>
+                            <span x-text="stats.medRiskCount + ' Slopes'"></span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2">
+                            <div class="bg-amber-500 h-2 rounded-full" :style="'width: ' + ((stats.medRiskCount / stats.totalSlopes) * 100) + '%'"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                            <span>Low Risk (RS &lt; 100)</span>
+                            <span x-text="stats.lowRiskCount + ' Slopes'"></span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2">
+                            <div class="bg-emerald-500 h-2 rounded-full" :style="'width: ' + ((stats.lowRiskCount / stats.totalSlopes) * 100) + '%'"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right 1/3: Alerts, Risk distribution, and failures timeline -->
-            <div class="space-y-6">
-                
-                <!-- Highest Risk Warning Alert -->
-                <div class="bg-red-50 border border-red-200 rounded-3xl p-6 space-y-3 relative overflow-hidden" x-show="stats.highestRiskSlope">
-                    <div class="absolute -right-6 -bottom-6 opacity-5 text-red-900">
-                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-3">
+                <h4 class="font-bold text-gray-800 text-sm">Asset Type Distributions</h4>
+                <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-gray-600">
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
+                        Cut Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['cut-type']">0</span>
                     </div>
-                    
-                    <div class="flex items-center space-x-2.5">
-                        <span class="relative flex h-3 w-3">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                        </span>
-                        <h4 class="text-xs font-black text-red-800 uppercase tracking-widest">Immediate Mitigation Required</h4>
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
+                        Rock Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['rock-type']">0</span>
                     </div>
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
+                        Fill Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['fill-type']">0</span>
+                    </div>
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
+                        Retaining Wall: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['retaining-type']">0</span>
+                    </div>
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100 col-span-2">
+                        Combine Slope: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['combine-type']">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="pt-1.5">
-                        <h3 class="text-2xl font-black text-red-950" x-text="stats.highestRiskSlope?.slope_name"></h3>
-                        <p class="text-xs text-red-700 font-bold" x-text="stats.highestRiskSlope?.location"></p>
+        <!-- Schedule Inspection + Quote Banner -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
+                <div class="flex justify-between items-center border-b border-gray-100 pb-3 flex-wrap gap-3">
+                    <div>
+                        <h4 class="font-extrabold text-gray-800 text-base">Upcoming Inspection Schedule</h4>
+                        <p class="text-xs text-gray-400 font-semibold">Nearest engineer inspection and routine maintenance timelines</p>
                     </div>
-
-                    <div class="flex justify-between items-center text-xs pt-1">
-                        <span class="text-red-800 font-semibold">Ranking Score (RS):</span>
-                        <span class="text-lg font-black text-red-900" x-text="parseFloat(stats.highestRiskSlope?.ranking?.RS).toFixed(2)">0.00</span>
-                    </div>
-
-                    <a :href="'detail.html?slug=' + stats.highestRiskSlope?.slug" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">
-                        Dispatch Investigation →
+                    <a href="inspection.html" class="text-xs bg-blue-100 text-blue-800 font-bold px-3 py-1.5 rounded-full hover:bg-blue-200 transition">
+                        View All Schedules →
                     </a>
                 </div>
 
-                <!-- Risk stratification progress indicators -->
-                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
-                    <h4 class="font-bold text-gray-800 text-sm">Slope Hazard Stratification</h4>
-                    <div class="space-y-3.5">
-                        <!-- High -->
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                                <span>High Risk (RS ≥ 1,000)</span>
-                                <span x-text="stats.highRiskCount + ' Slopes'"></span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-red-500 h-2 rounded-full" :style="'width: ' + ((stats.highRiskCount / stats.totalSlopes) * 100) + '%'"></div>
-                            </div>
-                        </div>
-
-                        <!-- Medium -->
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                                <span>Medium Risk (100 - 999)</span>
-                                <span x-text="stats.medRiskCount + ' Slopes'"></span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-amber-500 h-2 rounded-full" :style="'width: ' + ((stats.medRiskCount / stats.totalSlopes) * 100) + '%'"></div>
-                            </div>
-                        </div>
-
-                        <!-- Low -->
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                                <span>Low Risk (RS < 100)</span>
-                                <span x-text="stats.lowRiskCount + ' Slopes'"></span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-emerald-500 h-2 rounded-full" :style="'width: ' + ((stats.lowRiskCount / stats.totalSlopes) * 100) + '%'"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slope Type Distributions -->
-                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-3">
-                    <h4 class="font-bold text-gray-800 text-sm">Asset Type Distributions</h4>
-                    <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-gray-600">
-                        <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                            Cut Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['cut-type']">0</span>
-                        </div>
-                        <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                            Rock Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['rock-type']">0</span>
-                        </div>
-                        <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                            Fill Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['fill-type']">0</span>
-                        </div>
-                        <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                            Retaining Wall: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['retaining-type']">0</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- Failure Log timeline + compact sliding banner banner -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Timeline of landslide occurrences -->
-            <div class="lg:col-span-2 bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
-                <div class="flex justify-between items-center border-b border-gray-100 pb-3">
-                    <div>
-                        <h4 class="font-extrabold text-gray-800 text-base">Recent Landslide Incident Log</h4>
-                        <p class="text-xs text-gray-400 font-semibold">Failure records reported on toll roadway sections</p>
-                    </div>
-                    <span class="text-xs bg-red-100 text-red-800 font-bold px-2.5 py-0.5 rounded-full" x-text="stats.recentRecords?.length + ' Logs'"></span>
-                </div>
-
-                <div class="space-y-4">
-                    <template x-for="rec in stats.recentRecords" :key="rec.id">
-                        <div class="p-4 bg-stone-50/50 hover:bg-stone-50 border border-gray-150 rounded-2xl flex justify-between items-center transition">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-black uppercase bg-red-600 text-white px-2 py-0.5 rounded" x-text="rec.type_of_failure"></span>
-                                    <span class="text-xs font-bold text-gray-800" x-text="rec.slope_name"></span>
-                                    <span class="text-xs text-gray-400" x-text="'at ' + rec.date_of_occurrence"></span>
-                                </div>
-                                <p class="text-xs text-gray-500 font-medium" x-text="rec.type_of_damage"></p>
-                                <div class="text-[10px] font-bold text-gray-400">
-                                    Blockade: <span class="text-red-700" x-text="rec.traffic_blockade"></span> | 
-                                    Debris: <span class="text-gray-700" x-text="rec.volume_of_fallen_debris_rocks + 'm³'"></span> | 
-                                    Rainfall: <span class="text-gray-700" x-text="rec.rainfall_24_hours + 'mm'"></span>
-                                </div>
-                            </div>
-                            <a :href="'detail.html?slug=' + rec.slug" class="text-xs text-lime-600 hover:text-lime-700 font-bold hover:underline whitespace-nowrap">
-                                Open Slope Details →
-                            </a>
-                        </div>
-                    </template>
-                    <div x-show="stats.recentRecords?.length === 0" class="text-center py-6 text-gray-400 italic">No landslide failure incidents recorded.</div>
+                <div class="overflow-x-auto border border-gray-100 rounded-2xl">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-600 uppercase bg-stone-50 border-b border-gray-100 font-bold">
+                            <tr>
+                                <th scope="col" class="px-5 py-3">Slope</th>
+                                <th scope="col" class="px-5 py-3">Category</th>
+                                <th scope="col" class="px-5 py-3">Next Engineer Inspection</th>
+                                <th scope="col" class="px-5 py-3">Next Maintenance</th>
+                                <th scope="col" class="px-5 py-3 text-right">RS Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="item in stats.upcomingInspections" :key="item.slug">
+                                <tr class="border-b border-gray-100 hover:bg-stone-50/70 transition">
+                                    <td class="px-5 py-3.5">
+                                        <div class="font-extrabold text-gray-800" x-text="item.slope_name"></div>
+                                        <div class="text-[10px] text-gray-400 font-semibold truncate max-w-xs" x-text="item.location"></div>
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        <span class="inline-block px-2 py-0.5 text-[10px] font-bold bg-stone-100 text-stone-700 rounded-full" x-text="item.consequence_to_life.replace('category-', 'Cat. ')"></span>
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        <div class="font-bold text-gray-700 text-xs" x-text="formatDate(item.engineer_inspection)"></div>
+                                        <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(item.engineer_inspection)" x-text="daysRemaining(item.engineer_inspection)"></div>
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        <div class="font-bold text-gray-700 text-xs" x-text="formatDate(item.maintenance_inspection)"></div>
+                                        <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(item.maintenance_inspection)" x-text="daysRemaining(item.maintenance_inspection)"></div>
+                                    </td>
+                                    <td class="px-5 py-3.5 text-right">
+                                        <span class="font-black text-xs"
+                                              :class="item.rs >= 1000 ? 'text-red-600' : (item.rs >= 100 ? 'text-amber-600' : 'text-emerald-600')"
+                                              x-text="item.rs.toFixed(2)"></span>
+                                    </td>
+                                </tr>
+                            </template>
+                            <tr x-show="!stats.upcomingInspections || stats.upcomingInspections.length === 0">
+                                <td colspan="5" class="text-center py-8 text-gray-400 italic">No inspection schedules found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Compact quote slide banner -->
-            <div class="lg:col-span-1 relative overflow-hidden rounded-3xl bg-lime-950 p-6 text-white shadow-lg flex flex-col justify-between" style="background-image: url('components/bg2.webp'); background-size: cover; background-position: center;">
+            <!-- Core Philosophy Quote Banner -->
+            <div class="lg:col-span-1 relative overflow-hidden rounded-3xl bg-lime-950 p-6 text-white shadow-lg flex flex-col justify-between min-h-[280px]" style="background-image: url('components/bg2.webp'); background-size: cover; background-position: center;">
                 <div class="absolute inset-0 bg-lime-950/70 z-0"></div>
                 <div class="relative z-10 space-y-3">
                     <span class="inline-block bg-lime-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Core Philosophy</span>
                     <blockquote class="text-sm font-extrabold italic leading-relaxed">
                         "Engineering is the professional art of applying science to the optimum conversion of natural resources to the benefit of man."
                     </blockquote>
-                    <cite class="block text-[11px] font-semibold text-lime-300">— Ralph J. Smith</cite>
+                    <cite class="block text-[11px] font-semibold text-lime-300 not-italic">— Ralph J. Smith</cite>
                 </div>
-            </div>
-
-        </div>
-
-        <!-- Unified Interactive Modules Grid -->
-        <div class="space-y-4 pt-4">
-            <h3 class="font-extrabold text-gray-800 text-lg uppercase tracking-wider border-b border-gray-150 pb-2">Interactive Management Modules</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-                
-                <!-- Card 1: SLOPE INVENTORY -->
-                <a href="inventory.html" class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <div class="rounded-2xl bg-lime-50 p-3 group-hover:scale-105 transition duration-300">
-                                <img src="components/icons/inventory-ico.svg" class="h-8 w-8" alt="Inventory">
-                            </div>
-                            <span class="text-[10px] font-extrabold text-lime-700 bg-lime-50 px-2 py-1 rounded-full uppercase tracking-wider">Inventory</span>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-lime-600 transition">Slope Inventory</h3>
-                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                                Complete database of all managed slopes with essential monitoring data.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-105 pt-4 mt-4 space-y-2">
-                        <div class="flex justify-between items-center text-xs font-semibold text-gray-600">
-                            <span>Total Slopes:</span>
-                            <span class="font-black text-gray-900" x-text="stats.totalSlopes">0</span>
-                        </div>
-                        <div class="flex justify-between items-center text-[10px] text-gray-500 font-medium">
-                            <span>Side A / B:</span>
-                            <span class="font-bold text-gray-700" x-text="(stats.sideA || 0) + ' / ' + (stats.sideB || 0)">0 / 0</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 2: SLOPE PRIORITY -->
-                <a href="priority.html" class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <div class="rounded-2xl bg-red-50 p-3 group-hover:scale-105 transition duration-300">
-                                <img src="components/icons/management-ico.svg" class="h-8 w-8" alt="Priority">
-                            </div>
-                            <span class="text-[10px] font-extrabold text-red-700 bg-red-50 px-2 py-1 rounded-full uppercase tracking-wider">Priority</span>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-red-600 transition">Slope Priority</h3>
-                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                                Rank slopes based on risk and urgency for effective resource allocation.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-105 pt-4 mt-4 space-y-2">
-                        <div class="flex justify-between items-center text-xs font-semibold text-gray-600">
-                            <span>High Risk:</span>
-                            <span class="font-black text-red-600" x-text="stats.highRiskCount + ' Slopes'">0</span>
-                        </div>
-                        <div class="flex justify-between items-center text-[10px] text-gray-500 font-medium">
-                            <span>Max Risk Rank:</span>
-                            <span class="font-bold text-gray-700 truncate max-w-[90px]" :title="stats.highestRiskSlope?.slope_name || '-'" x-text="stats.highestRiskSlope ? stats.highestRiskSlope.slope_name : '-'">-</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 3: INSPECTION -->
-                <a href="inspection.html" class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <div class="rounded-2xl bg-blue-50 p-3 group-hover:scale-105 transition duration-300">
-                                <img src="components/icons/inspection-ico.svg" class="h-8 w-8" alt="Inspection">
-                            </div>
-                            <span class="text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-1 rounded-full uppercase tracking-wider">Surveys</span>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition">Inspection</h3>
-                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                                Track inspections and report issues in real-time for early detection.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-105 pt-4 mt-4 space-y-2">
-                        <div class="flex justify-between items-center text-xs font-semibold text-gray-600">
-                            <span>Due Schedules:</span>
-                            <span class="font-black text-blue-600" x-text="stats.totalInspections">0</span>
-                        </div>
-                        <div class="flex justify-between items-center text-[10px] text-gray-500 font-medium">
-                            <span>Completed Logs:</span>
-                            <span class="font-bold text-gray-700" x-text="stats.totalMaintenances + ' Logs'">0 Logs</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 4: SLOPE PRESERVATION -->
-                <a href="preservation.html" class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <div class="rounded-2xl bg-teal-50 p-3 group-hover:scale-105 transition duration-300">
-                                <img src="components/icons/preservation-ico.svg" class="h-8 w-8" alt="Preservation">
-                            </div>
-                            <span class="text-[10px] font-extrabold text-teal-700 bg-teal-50 px-2 py-1 rounded-full uppercase tracking-wider">Upgrades</span>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-teal-600 transition">Slope Preservation</h3>
-                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                                Plan preservation works and structural maintenance to ensure stability.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-105 pt-4 mt-4 space-y-2">
-                        <div class="flex justify-between items-center text-xs font-semibold text-gray-600">
-                            <span>Slope Upgrades:</span>
-                            <span class="font-black text-teal-600" x-text="stats.totalPreservations">0</span>
-                        </div>
-                        <div class="flex justify-between items-center text-[10px] text-gray-500 font-medium">
-                            <span>Active Repairs:</span>
-                            <span class="font-bold text-gray-700">Active</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 5: MITIGATION CALCULATE -->
-                <a href="mitigation.html" class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <div class="rounded-2xl bg-amber-50 p-3 group-hover:scale-105 transition duration-300">
-                                <img src="components/icons/mitigation-ico.svg" class="h-8 w-8" alt="Mitigation">
-                            </div>
-                            <span class="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-2 py-1 rounded-full uppercase tracking-wider">Budget</span>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-amber-600 transition">Mitigation Budget</h3>
-                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                                Calculate tailored mitigation costs and budget planning based on risks.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-105 pt-4 mt-4 space-y-2">
-                        <div class="flex justify-between items-center text-xs font-semibold text-gray-600">
-                            <span>Forecast Cost:</span>
-                            <span class="font-black text-amber-600" x-text="stats.totalMitigationCost ? 'Rp ' + (stats.totalMitigationCost / 1000000000).toFixed(2) + ' B' : 'Rp 0 B'">Rp 0 B</span>
-                        </div>
-                        <div class="flex justify-between items-center text-[10px] text-gray-500 font-medium">
-                            <span>Total Proposals:</span>
-                            <span class="font-bold text-gray-700" x-text="stats.totalMitigations + ' Plans'">0 Plans</span>
-                        </div>
-                    </div>
-                </a>
-
             </div>
         </div>
 
     </div>
 
-    <!-- Loading Screen Placeholder -->
+    <!-- Loading -->
     <div class="flex items-center justify-center min-h-screen bg-stone-50" x-show="loading">
         <div class="text-center space-y-3">
             <div class="w-12 h-12 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p class="text-gray-500 font-semibold text-sm">Compiling system telemetry telemetry...</p>
+            <p class="text-gray-500 font-semibold text-sm">Compiling system telemetry...</p>
         </div>
     </div>
 
-    <!-- Flowbite JS Bundle -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 
     <script>
@@ -515,8 +377,6 @@
                 userName: 'Admin User',
                 loading: true,
                 stats: {},
-                map: null,
-                selectedRiskFilter: 'all',
 
                 init() {
                     const session = localStorage.getItem('user');
@@ -526,7 +386,6 @@
                     }
                     const user = JSON.parse(session);
                     this.userName = user.name;
-                    
                     this.fetchTelemetry();
                 },
 
@@ -536,11 +395,6 @@
                         .then(data => {
                             this.stats = data;
                             this.loading = false;
-                            
-                            // Initialize interactive map next tick
-                            setTimeout(() => {
-                                this.initMap();
-                            }, 100);
                         })
                         .catch(err => {
                             console.error('Telemetry fetch error:', err);
@@ -548,90 +402,39 @@
                         });
                 },
 
-                initMap() {
-                    // Central coordinate of toll road section (Semarang ABC)
-                    this.map = L.map('dashboardMap').setView([-7.02, 110.41], 13);
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(this.map);
-
-                    // Add color-coded markers for each slope
-                    if (this.stats.mapMarkers && this.stats.mapMarkers.length > 0) {
-                        this.stats.mapMarkers.forEach(m => {
-                            const lat = parseFloat(m.latitude);
-                            const lng = parseFloat(m.longtitude);
-
-                            if (!isNaN(lat) && !isNaN(lng)) {
-                                // Determine icon class based on RS score
-                                let markerClass = 'pulse-pin-green';
-                                if (m.rs >= 1000) {
-                                    markerClass = 'pulse-pin-red';
-                                } else if (m.rs >= 100) {
-                                    markerClass = 'pulse-pin-amber';
-                                }
-
-                                const customIcon = L.divIcon({
-                                    className: markerClass,
-                                    iconSize: [14, 14],
-                                    popupAnchor: [0, -5]
-                                });
-
-                                const popupHtml = `
-                                    <div class="text-gray-900 font-sans p-1">
-                                        <p class="font-extrabold text-sm text-lime-700">${m.slope_name}</p>
-                                        <p class="text-xs font-semibold text-gray-500">${(m.slope_type || '').replace('-type', '').toUpperCase()} Slope</p>
-                                        <p class="text-[10px] text-gray-400 mt-1">${m.location}</p>
-                                        <div class="flex justify-between items-center mt-2.5 border-t border-gray-100 pt-1.5">
-                                            <span class="text-[10px] font-bold text-gray-500">RS Score:</span>
-                                            <span class="font-black text-xs text-lime-600">${parseFloat(m.rs || 0).toFixed(2)}</span>
-                                        </div>
-                                        <a href="detail.html?slug=${m.slug}" onclick="window.location.href='detail.html?slug=${m.slug}'; return false;" class="block mt-2 text-center bg-lime-600 hover:bg-lime-750 text-white font-bold text-[10px] py-1 rounded transition">Open Details</a>
-                                    </div>
-                                `;
-
-                                L.marker([lat, lng], { icon: customIcon })
-                                    .addTo(this.map)
-                                    .bindPopup(popupHtml)
-                                    .bindTooltip(m.slope_name, {
-                                        permanent: true,
-                                        direction: 'top',
-                                        offset: [0, -10],
-                                        className: 'map-label'
-                                    });
-                            }
-                        });
-                    }
-                    // Auto-frame all markers on load
-                    this.focusMapOnRisk('all');
+                formatDate(dateStr) {
+                    if (!dateStr) return '—';
+                    return new Date(dateStr).toLocaleDateString('en-GB', {
+                        day: '2-digit', month: 'short', year: 'numeric'
+                    });
                 },
 
-                focusMapOnRisk(level) {
-                    this.selectedRiskFilter = level;
-                    if (!this.map || !this.stats.mapMarkers) return;
-                    
-                    const coords = [];
-                    this.stats.mapMarkers.forEach(m => {
-                        const lat = parseFloat(m.latitude);
-                        const lng = parseFloat(m.longtitude);
-                        if (!isNaN(lat) && !isNaN(lng)) {
-                            if (level === 'all') {
-                                coords.push([lat, lng]);
-                            } else if (level === 'high' && m.rs >= 1000) {
-                                coords.push([lat, lng]);
-                            } else if (level === 'medium' && m.rs >= 100 && m.rs < 1000) {
-                                coords.push([lat, lng]);
-                            } else if (level === 'low' && m.rs < 100) {
-                                coords.push([lat, lng]);
-                            }
-                        }
-                    });
-
-                    if (coords.length > 0) {
-                        const bounds = L.latLngBounds(coords);
-                        this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+                daysRemaining(dateStr) {
+                    if (!dateStr) return '';
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const target = new Date(dateStr);
+                    target.setHours(0, 0, 0, 0);
+                    const days = Math.round((target - today) / (1000 * 60 * 60 * 24));
+                    if (days < 0) {
+                        const overdue = Math.abs(days);
+                        return overdue === 1 ? '1 day overdue' : `${overdue} days overdue`;
                     }
+                    if (days === 0) return 'Today';
+                    if (days === 1) return '1 day left';
+                    return `${days} days left`;
+                },
+
+                daysRemainingClass(dateStr) {
+                    if (!dateStr) return 'text-gray-400';
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const target = new Date(dateStr);
+                    target.setHours(0, 0, 0, 0);
+                    const days = Math.round((target - today) / (1000 * 60 * 60 * 24));
+                    if (days < 0) return 'text-red-500';
+                    if (days <= 30) return 'text-amber-600';
+                    return 'text-gray-400';
                 },
 
                 logout() {
