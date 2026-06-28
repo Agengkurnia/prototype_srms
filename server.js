@@ -120,6 +120,9 @@ app.get('/api/dashboard/stats', (req, res) => {
     'combine-type': 0
   };
 
+  let sideAHigh = 0, sideAMed = 0, sideALow = 0, sideATotalRS = 0, sideACount = 0;
+  let sideBHigh = 0, sideBMed = 0, sideBLow = 0, sideBTotalRS = 0, sideBCount = 0;
+
   slopes.forEach(s => {
     // Increment type count
     if (typeCounts[s.slope_type] !== undefined) {
@@ -141,7 +144,44 @@ app.get('/api/dashboard/stats', (req, res) => {
       maxRS = rs;
       highestRiskSlope = s;
     }
+
+    // Road side calculations
+    if (s.side_of_road === 'A') {
+      sideACount++;
+      sideATotalRS += rs;
+      if (rs >= 1000) {
+        sideAHigh++;
+      } else if (rs >= 100) {
+        sideAMed++;
+      } else {
+        sideALow++;
+      }
+    } else if (s.side_of_road === 'B') {
+      sideBCount++;
+      sideBTotalRS += rs;
+      if (rs >= 1000) {
+        sideBHigh++;
+      } else if (rs >= 100) {
+        sideBMed++;
+      } else {
+        sideBLow++;
+      }
+    }
   });
+
+  const sideARisk = {
+    high: sideAHigh,
+    med: sideAMed,
+    low: sideALow,
+    avgRS: sideACount > 0 ? sideATotalRS / sideACount : 0
+  };
+
+  const sideBRisk = {
+    high: sideBHigh,
+    med: sideBMed,
+    low: sideBLow,
+    avgRS: sideBCount > 0 ? sideBTotalRS / sideBCount : 0
+  };
 
   // Compile recent failures with slope names
   const recentRecords = records.slice(-4).reverse().map(r => {
@@ -164,6 +204,22 @@ app.get('/api/dashboard/stats', (req, res) => {
     rs: s.ranking && s.ranking.RS !== '-' ? parseFloat(s.ranking.RS) : 0
   }));
 
+  // Upcoming inspection schedules (sorted by nearest engineer inspection date)
+  const upcomingInspections = slopes
+    .filter(s => s.engineer_inspection)
+    .map(s => ({
+      slope_name: s.slope_name,
+      slug: s.slug,
+      location: s.location,
+      side_of_road: s.side_of_road,
+      engineer_inspection: s.engineer_inspection,
+      maintenance_inspection: s.maintenance_inspection,
+      consequence_to_life: (s.rating && s.rating.consequence_to_life) || 'category-2',
+      rs: s.ranking && s.ranking.RS !== '-' ? parseFloat(s.ranking.RS) : 0
+    }))
+    .sort((a, b) => new Date(a.engineer_inspection) - new Date(b.engineer_inspection))
+    .slice(0, 8);
+
   // Calculate mitigation costs
   let totalMitigationCost = 0;
   mitigations.forEach(m => {
@@ -181,7 +237,10 @@ app.get('/api/dashboard/stats', (req, res) => {
     typeCounts,
     highestRiskSlope,
     recentRecords,
+    upcomingInspections,
     mapMarkers,
+    sideARisk,
+    sideBRisk,
     // Enriched stats for dashboards
     totalInspections: inspections.length,
     totalMaintenances: maintenances.length,

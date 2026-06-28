@@ -5,14 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telemetry Dashboard | Slope Risk Management System</title>
     <link rel="icon" type="image/svg+xml" href="components/icons/icon-lhms.svg">
-    <!-- Google Font Figtree -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Leaflet Map CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Tailwind CSS & Flowbite & Alpine.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -28,38 +23,23 @@
         }
     </script>
     <style>
-        /* Pulse Animation for Map Pins */
-        .pulse-pin-red {
-            background: #ef4444;
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            animation: pulse 1.8s infinite;
+        .kpi-card {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
-        .pulse-pin-amber {
-            background: #f59e0b;
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-            animation: pulse 1.8s infinite;
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
         }
-        .pulse-pin-green {
-            background: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            animation: pulse 1.8s infinite;
+        .kpi-card:active {
+            transform: translateY(0);
         }
-        @keyframes pulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            }
-            70% {
-                transform: scale(1.1);
-                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-            }
+        @keyframes kpi-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
+            50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+        }
+        .kpi-pulse-high {
+            animation: kpi-pulse 2s infinite;
         }
     </style>
 </head>
@@ -76,28 +56,22 @@
                     </p>
                 </div>
             </a>
-            
+
             <button data-collapse-toggle="mega-menu-full" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none" aria-controls="mega-menu-full" aria-expanded="false">
                 <span class="sr-only">Open main menu</span>
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 17 14"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/></svg>
             </button>
 
             <div id="mega-menu-full" class="items-center justify-between font-medium hidden w-full md:flex md:w-auto md:order-1">
-                <ul class="flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 md:flex-row md:mt-0 md:border-0 bg-white items-center">
-                    <li><a href="#" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">What's New</a></li>
-                    <li><a href="#" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">About Us</a></li>
-                    <li>
-                        <button id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar" class="flex items-center justify-between w-full py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Document Publish <svg class="w-2.5 h-2.5 ms-2.5" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/></svg></button>
-                        <div id="dropdownNavbar" class="hidden font-normal bg-white divide-y divide-gray-100 rounded-xl shadow-lg w-44 border border-gray-100">
-                            <ul class="py-2 text-sm text-gray-700 font-semibold">
-                                <li><a href="#" class="block px-4 py-2 hover:bg-lime-50">Publish 1</a></li>
-                                <li><a href="#" class="block px-4 py-2 hover:bg-lime-50">Publish 2</a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li><a href="#" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Documents</a></li>
-                    <li class="border-l border-gray-200 h-6 mx-2 hidden md:block"></li>
-                    <!-- User Account Dropdown -->
+                <ul class="flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-6 md:flex-row md:mt-0 md:border-0 bg-white items-center text-sm">
+                    <li><a href="index.html" class="block py-2 px-3 text-lime-600 font-bold">Dashboard</a></li>
+                    <li><a href="inventory.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Inventory</a></li>
+                    <li><a href="priority.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Priority</a></li>
+                    <li><a href="inspection.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Inspection</a></li>
+                    <li><a href="preservation.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Preservation</a></li>
+                    <li><a href="mitigation.html" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Mitigation</a></li>
+                    <li><a href="slope-information.html" target="_blank" rel="noopener noreferrer" class="block py-2 px-3 text-gray-700 hover:text-lime-600 transition font-semibold">Slope Map ↗</a></li>
+                    <li class="border-l border-gray-200 h-6 mx-1 hidden md:block"></li>
                     <li>
                         <button id="dropdownMenuIconButton" data-dropdown-toggle="dropdownDots" class="inline-flex items-center p-2 text-sm font-medium text-center rounded-xl hover:bg-gray-50 focus:outline-none transition" type="button">
                             <div class="mr-2.5 font-bold text-sm text-gray-800" x-text="userName"></div>
@@ -114,410 +88,359 @@
         </div>
     </nav>
 
-    <!-- Main Content Wrapper -->
+    <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-6 py-6 space-y-6" x-show="!loading">
 
-        <!-- Top Overview Numbers Grid -->
+        <!-- KPI Overview (interactive filters) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <!-- Total Assets -->
-            <div @click="focusMapOnRisk('all')" :class="selectedRiskFilter === 'all' ? 'ring-2 ring-lime-500 bg-lime-50/10' : ''" class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4 cursor-pointer hover:shadow-md transition">
-                <div class="p-3 bg-lime-50 text-lime-600 rounded-xl">
+            <button type="button" @click="setRiskFilter('all')"
+                :aria-pressed="selectedRiskFilter === 'all'"
+                aria-label="Show all slopes, reset risk filter"
+                :class="selectedRiskFilter === 'all' ? 'ring-2 ring-lime-500 border-lime-300 bg-lime-50/40 shadow-md' : 'border-gray-200 hover:border-lime-200'"
+                class="kpi-card bg-white border shadow-sm rounded-2xl p-5 flex items-center space-x-4 text-left w-full">
+                <div class="p-3 bg-lime-50 text-lime-600 rounded-xl shrink-0">
                     <img src="components/icons/inventory-ico.svg" class="h-6 w-6" alt="Icon">
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Total Slopes</p>
                     <h3 class="text-2xl font-black text-gray-800" x-text="stats.totalSlopes">0</h3>
+                    <p class="text-[10px] text-gray-400 font-semibold mt-0.5">All assets · click to reset</p>
+                    <div class="w-full bg-gray-100 rounded-full h-1 mt-2">
+                        <div class="bg-lime-500 h-1 rounded-full w-full"></div>
+                    </div>
                 </div>
-            </div>
+            </button>
 
-            <!-- High Risk Slopes -->
-            <div @click="focusMapOnRisk('high')" :class="selectedRiskFilter === 'high' ? 'ring-2 ring-red-500 bg-red-50/10' : ''" class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4 cursor-pointer hover:shadow-md transition">
-                <div class="p-3 bg-red-50 text-red-600 rounded-xl">
+            <button type="button" @click="setRiskFilter('high')"
+                :aria-pressed="selectedRiskFilter === 'high'"
+                aria-label="Filter by high risk slopes"
+                :class="[
+                    selectedRiskFilter === 'high' ? 'ring-2 ring-red-500 border-red-300 bg-red-50/40 shadow-md' : 'border-gray-200 hover:border-red-200',
+                    stats.highRiskCount > 0 ? 'kpi-pulse-high' : ''
+                ]"
+                class="kpi-card bg-white border shadow-sm rounded-2xl p-5 flex items-center space-x-4 text-left w-full">
+                <div class="p-3 bg-red-50 text-red-600 rounded-xl shrink-0">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">High Risk (RS ≥1k)</p>
                     <h3 class="text-2xl font-black text-red-600" x-text="stats.highRiskCount">0</h3>
+                    <p class="text-[10px] text-red-500/80 font-semibold mt-0.5" x-text="riskPercent('high') + '% of fleet'"></p>
+                    <div class="w-full bg-gray-100 rounded-full h-1 mt-2">
+                        <div class="bg-red-500 h-1 rounded-full transition-all duration-500" :style="'width:' + riskPercent('high') + '%'"></div>
+                    </div>
                 </div>
-            </div>
+            </button>
 
-            <!-- Medium Risk Slopes -->
-            <div @click="focusMapOnRisk('medium')" :class="selectedRiskFilter === 'medium' ? 'ring-2 ring-amber-500 bg-amber-50/10' : ''" class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4 cursor-pointer hover:shadow-md transition">
-                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+            <button type="button" @click="setRiskFilter('medium')"
+                :aria-pressed="selectedRiskFilter === 'medium'"
+                aria-label="Filter by medium risk slopes"
+                :class="selectedRiskFilter === 'medium' ? 'ring-2 ring-amber-500 border-amber-300 bg-amber-50/40 shadow-md' : 'border-gray-200 hover:border-amber-200'"
+                class="kpi-card bg-white border shadow-sm rounded-2xl p-5 flex items-center space-x-4 text-left w-full">
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl shrink-0">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Medium Risk</p>
                     <h3 class="text-2xl font-black text-amber-600" x-text="stats.medRiskCount">0</h3>
+                    <p class="text-[10px] text-amber-600/80 font-semibold mt-0.5" x-text="riskPercent('medium') + '% of fleet'"></p>
+                    <div class="w-full bg-gray-100 rounded-full h-1 mt-2">
+                        <div class="bg-amber-500 h-1 rounded-full transition-all duration-500" :style="'width:' + riskPercent('medium') + '%'"></div>
+                    </div>
                 </div>
-            </div>
+            </button>
 
-            <!-- Low Risk Slopes -->
-            <div @click="focusMapOnRisk('low')" :class="selectedRiskFilter === 'low' ? 'ring-2 ring-emerald-500 bg-emerald-50/10' : ''" class="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex items-center space-x-4 cursor-pointer hover:shadow-md transition">
-                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+            <button type="button" @click="setRiskFilter('low')"
+                :aria-pressed="selectedRiskFilter === 'low'"
+                aria-label="Filter by low risk slopes"
+                :class="selectedRiskFilter === 'low' ? 'ring-2 ring-emerald-500 border-emerald-300 bg-emerald-50/40 shadow-md' : 'border-gray-200 hover:border-emerald-200'"
+                class="kpi-card bg-white border shadow-sm rounded-2xl p-5 flex items-center space-x-4 text-left w-full">
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl shrink-0">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                     <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Low Risk</p>
                     <h3 class="text-2xl font-black text-emerald-600" x-text="stats.lowRiskCount">0</h3>
+                    <p class="text-[10px] text-emerald-600/80 font-semibold mt-0.5" x-text="riskPercent('low') + '% of fleet'"></p>
+                    <div class="w-full bg-gray-100 rounded-full h-1 mt-2">
+                        <div class="bg-emerald-500 h-1 rounded-full transition-all duration-500" :style="'width:' + riskPercent('low') + '%'"></div>
+                    </div>
                 </div>
+            </button>
+        </div>
+
+        <!-- Active filter hint -->
+        <div x-show="selectedRiskFilter !== 'all'" x-transition class="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-xs">
+            <span class="font-semibold text-gray-600">
+                Filtering schedule by:
+                <span class="font-black uppercase" :class="{
+                    'text-red-600': selectedRiskFilter === 'high',
+                    'text-amber-600': selectedRiskFilter === 'medium',
+                    'text-emerald-600': selectedRiskFilter === 'low'
+                }" x-text="selectedRiskFilter + ' risk'"></span>
+                · <span x-text="filteredSchedule().length + ' slopes shown'"></span>
+            </span>
+            <button @click="setRiskFilter('all')" class="text-lime-600 hover:text-lime-700 font-bold">Clear filter ×</button>
+        </div>
+
+        <!-- Module Launchpad (moved to top) -->
+        <div class="space-y-4">
+            <h3 class="font-extrabold text-gray-800 text-lg uppercase tracking-wider border-b border-gray-150 pb-2">Interactive Management Modules</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+
+                <a href="inventory.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-lime-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/inventory-ico.svg" class="h-7 w-7" alt="Inventory">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-lime-700 bg-lime-50 px-2 py-1 rounded-full uppercase tracking-wider">Inventory</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-lime-600 transition">Slope Inventory</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Complete database of all managed slopes.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        Total: <span class="font-black text-gray-900" x-text="stats.totalSlopes">0</span>
+                    </div>
+                </a>
+
+                <a href="priority.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-red-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/management-ico.svg" class="h-7 w-7" alt="Priority">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-red-700 bg-red-50 px-2 py-1 rounded-full uppercase tracking-wider">Priority</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-red-600 transition">Slope Priority</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Rank slopes by risk and urgency.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        High Risk: <span class="font-black text-red-600" x-text="stats.highRiskCount">0</span>
+                    </div>
+                </a>
+
+                <a href="inspection.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-blue-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/inspection-ico.svg" class="h-7 w-7" alt="Inspection">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-1 rounded-full uppercase tracking-wider">Surveys</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition">Inspection</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Track inspections and maintenance logs.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        Logs: <span class="font-black text-blue-600" x-text="stats.totalMaintenances">0</span>
+                    </div>
+                </a>
+
+                <a href="preservation.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-teal-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/preservation-ico.svg" class="h-7 w-7" alt="Preservation">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-teal-700 bg-teal-50 px-2 py-1 rounded-full uppercase tracking-wider">Upgrades</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-teal-600 transition">Slope Preservation</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Plan preservation and structural works.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        Upgrades: <span class="font-black text-teal-600" x-text="stats.totalPreservations">0</span>
+                    </div>
+                </a>
+
+                <a href="mitigation.html" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-amber-50 p-3 group-hover:scale-105 transition duration-300">
+                                <img src="components/icons/mitigation-ico.svg" class="h-7 w-7" alt="Mitigation">
+                            </div>
+                            <span class="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-2 py-1 rounded-full uppercase tracking-wider">Budget</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-amber-600 transition">Mitigation Budget</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Calculate mitigation costs and proposals.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-xs font-semibold text-gray-600">
+                        Plans: <span class="font-black text-amber-600" x-text="stats.totalMitigations">0</span>
+                    </div>
+                </a>
+
+                <a href="slope-information.html" target="_blank" rel="noopener noreferrer" class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between group ring-1 ring-transparent hover:ring-lime-200">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="rounded-2xl bg-indigo-50 p-3 group-hover:scale-105 transition duration-300">
+                                <svg class="h-7 w-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-indigo-700 bg-indigo-50 px-2 py-1 rounded-full uppercase tracking-wider">Map</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition">Slope Information</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">Geographic map of all slope assets. Opens in new tab.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 mt-3 text-[10px] font-bold text-indigo-600">
+                        Open Map ↗
+                    </div>
+                </a>
+
             </div>
         </div>
 
-        <!-- Telemetry Main Grid: Map & Details column split -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Left 2/3: Live Geo-Risk Map -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Map Card -->
-                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h3 class="font-extrabold text-gray-800 text-lg">Interactive Risk Telemetry Map</h3>
-                            <p class="text-xs text-gray-400 font-medium">Visualizing geographic coordinates and hazard ratings for toll highway assets</p>
-                        </div>
-                        <div class="flex gap-2 text-[10px] font-bold text-gray-600">
-                            <span class="flex items-center"><span class="w-2.5 h-2.5 pulse-pin-red inline-block me-1"></span> High</span>
-                            <span class="flex items-center"><span class="w-2.5 h-2.5 pulse-pin-amber inline-block me-1"></span> Med</span>
-                            <span class="flex items-center"><span class="w-2.5 h-2.5 pulse-pin-green inline-block me-1"></span> Low</span>
-                        </div>
-                    </div>
-                    <!-- Map Container -->
-                    <div id="dashboardMap" class="h-[430px] w-full rounded-2xl border border-gray-150 relative z-10"></div>
-                </div>
-            </div>
-
-            <!-- Right 1/3: Alerts, Risk distribution, and failures timeline -->
-            <div class="space-y-6">
-                
-                <!-- Highest Risk Warning Alert -->
-                <div class="bg-red-50 border border-red-200 rounded-3xl p-6 space-y-3 relative overflow-hidden" x-show="stats.highestRiskSlope">
-                    <div class="absolute -right-6 -bottom-6 opacity-5 text-red-900">
-                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    </div>
-                    
-                    <div class="flex items-center space-x-2.5">
-                        <span class="relative flex h-3 w-3">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                        </span>
-                        <h4 class="text-xs font-black text-red-800 uppercase tracking-widest">Immediate Mitigation Required</h4>
-                    </div>
-
-                    <div class="pt-1.5">
-                        <h3 class="text-2xl font-black text-red-950" x-text="stats.highestRiskSlope?.slope_name"></h3>
-                        <p class="text-xs text-red-700 font-bold" x-text="stats.highestRiskSlope?.location"></p>
-                    </div>
-
-                    <div class="flex justify-between items-center text-xs pt-1">
-                        <span class="text-red-800 font-semibold">Ranking Score (RS):</span>
-                        <span class="text-lg font-black text-red-900" x-text="parseFloat(stats.highestRiskSlope?.ranking?.RS).toFixed(2)">0.00</span>
-                    </div>
-
-                    <a :href="'detail.html?slug=' + stats.highestRiskSlope?.slug" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">
-                        Dispatch Investigation →
-                    </a>
-                </div>
-
-                <!-- Risk stratification progress indicators -->
-                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
+        <!-- Risk summary + asset types -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4" :class="selectedRiskFilter !== 'all' ? 'ring-1 ring-lime-200' : ''">
+                <div class="flex justify-between items-center">
                     <h4 class="font-bold text-gray-800 text-sm">Slope Hazard Stratification</h4>
-                    <div class="space-y-3.5">
-                        <!-- High -->
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                                <span>High Risk (RS ≥ 1,000)</span>
-                                <span x-text="stats.highRiskCount + ' Slopes'"></span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-red-500 h-2 rounded-full" :style="'width: ' + ((stats.highRiskCount / stats.totalSlopes) * 100) + '%'"></div>
-                            </div>
+                    <span x-show="selectedRiskFilter !== 'all'" class="text-[10px] font-bold text-lime-600 bg-lime-50 px-2 py-0.5 rounded-full uppercase" x-text="'Filtered: ' + selectedRiskFilter"></span>
+                </div>
+                <div class="space-y-3.5">
+                    <div @click="setRiskFilter('high')" class="rounded-xl p-2 -mx-2 transition cursor-pointer" :class="selectedRiskFilter === 'high' ? 'bg-red-50 ring-1 ring-red-200' : (selectedRiskFilter === 'all' ? 'hover:bg-stone-50' : 'opacity-40')">
+                        <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                            <span>High Risk (RS ≥ 1,000)</span>
+                            <span x-text="stats.highRiskCount + ' Slopes'"></span>
                         </div>
-
-                        <!-- Medium -->
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                                <span>Medium Risk (100 - 999)</span>
-                                <span x-text="stats.medRiskCount + ' Slopes'"></span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-amber-500 h-2 rounded-full" :style="'width: ' + ((stats.medRiskCount / stats.totalSlopes) * 100) + '%'"></div>
-                            </div>
-                        </div>
-
-                        <!-- Low -->
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                                <span>Low Risk (RS < 100)</span>
-                                <span x-text="stats.lowRiskCount + ' Slopes'"></span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-emerald-500 h-2 rounded-full" :style="'width: ' + ((stats.lowRiskCount / stats.totalSlopes) * 100) + '%'"></div>
-                            </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5">
+                            <div class="bg-red-500 h-2.5 rounded-full transition-all duration-500" :class="selectedRiskFilter === 'high' || selectedRiskFilter === 'all' ? '' : 'opacity-50'" :style="'width: ' + ((stats.highRiskCount / stats.totalSlopes) * 100) + '%'"></div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Slope Type Distributions -->
-                <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-3">
-                    <h4 class="font-bold text-gray-800 text-sm">Asset Type Distributions</h4>
-                    <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-gray-600">
-                        <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                            Cut Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['cut-type']">0</span>
+                    <div @click="setRiskFilter('medium')" class="rounded-xl p-2 -mx-2 transition cursor-pointer" :class="selectedRiskFilter === 'medium' ? 'bg-amber-50 ring-1 ring-amber-200' : (selectedRiskFilter === 'all' ? 'hover:bg-stone-50' : 'opacity-40')">
+                        <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                            <span>Medium Risk (100 - 999)</span>
+                            <span x-text="stats.medRiskCount + ' Slopes'"></span>
                         </div>
-                        <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                            Rock Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['rock-type']">0</span>
-                        </div>
-                        <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                            Fill Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['fill-type']">0</span>
-                        </div>
-                        <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                            Retaining Wall: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['retaining-type']">0</span>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5">
+                            <div class="bg-amber-500 h-2.5 rounded-full transition-all duration-500" :class="selectedRiskFilter === 'medium' || selectedRiskFilter === 'all' ? '' : 'opacity-50'" :style="'width: ' + ((stats.medRiskCount / stats.totalSlopes) * 100) + '%'"></div>
                         </div>
                     </div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- Failure Log timeline + compact sliding banner banner -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Timeline of landslide occurrences -->
-            <div class="lg:col-span-2 bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
-                <div class="flex justify-between items-center border-b border-gray-100 pb-3">
-                    <div>
-                        <h4 class="font-extrabold text-gray-800 text-base">Recent Landslide Incident Log</h4>
-                        <p class="text-xs text-gray-400 font-semibold">Failure records reported on toll roadway sections</p>
-                    </div>
-                    <span class="text-xs bg-red-100 text-red-800 font-bold px-2.5 py-0.5 rounded-full" x-text="stats.recentRecords?.length + ' Logs'"></span>
-                </div>
-
-                <div class="space-y-4">
-                    <template x-for="rec in stats.recentRecords" :key="rec.id">
-                        <div class="p-4 bg-stone-50/50 hover:bg-stone-50 border border-gray-150 rounded-2xl flex justify-between items-center transition">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-black uppercase bg-red-600 text-white px-2 py-0.5 rounded" x-text="rec.type_of_failure"></span>
-                                    <span class="text-xs font-bold text-gray-800" x-text="rec.slope_name"></span>
-                                    <span class="text-xs text-gray-400" x-text="'at ' + rec.date_of_occurrence"></span>
-                                </div>
-                                <p class="text-xs text-gray-500 font-medium" x-text="rec.type_of_damage"></p>
-                                <div class="text-[10px] font-bold text-gray-400">
-                                    Blockade: <span class="text-red-700" x-text="rec.traffic_blockade"></span> | 
-                                    Debris: <span class="text-gray-700" x-text="rec.volume_of_fallen_debris_rocks + 'm³'"></span> | 
-                                    Rainfall: <span class="text-gray-700" x-text="rec.rainfall_24_hours + 'mm'"></span>
-                                </div>
-                            </div>
-                            <a :href="'detail.html?slug=' + rec.slug" class="text-xs text-lime-600 hover:text-lime-700 font-bold hover:underline whitespace-nowrap">
-                                Open Slope Details →
-                            </a>
+                    <div @click="setRiskFilter('low')" class="rounded-xl p-2 -mx-2 transition cursor-pointer" :class="selectedRiskFilter === 'low' ? 'bg-emerald-50 ring-1 ring-emerald-200' : (selectedRiskFilter === 'all' ? 'hover:bg-stone-50' : 'opacity-40')">
+                        <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                            <span>Low Risk (RS &lt; 100)</span>
+                            <span x-text="stats.lowRiskCount + ' Slopes'"></span>
                         </div>
-                    </template>
-                    <div x-show="stats.recentRecords?.length === 0" class="text-center py-6 text-gray-400 italic">No landslide failure incidents recorded.</div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5">
+                            <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" :class="selectedRiskFilter === 'low' || selectedRiskFilter === 'all' ? '' : 'opacity-50'" :style="'width: ' + ((stats.lowRiskCount / stats.totalSlopes) * 100) + '%'"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Compact quote slide banner -->
-            <div class="lg:col-span-1 relative overflow-hidden rounded-3xl bg-lime-950 p-6 text-white shadow-lg flex flex-col justify-between" style="background-image: url('components/bg2.webp'); background-size: cover; background-position: center;">
-                <div class="absolute inset-0 bg-lime-950/70 z-0"></div>
-                <div class="relative z-10 space-y-3">
-                    <span class="inline-block bg-lime-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Core Philosophy</span>
-                    <blockquote class="text-sm font-extrabold italic leading-relaxed">
-                        "Engineering is the professional art of applying science to the optimum conversion of natural resources to the benefit of man."
-                    </blockquote>
-                    <cite class="block text-[11px] font-semibold text-lime-300">— Ralph J. Smith</cite>
+            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-3">
+                <h4 class="font-bold text-gray-800 text-sm">Asset Type Distributions</h4>
+                <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-gray-600">
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
+                        Cut Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['cut-type']">0</span>
+                    </div>
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
+                        Rock Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['rock-type']">0</span>
+                    </div>
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
+                        Fill Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['fill-type']">0</span>
+                    </div>
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
+                        Retaining Wall: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['retaining-type']">0</span>
+                    </div>
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100 col-span-2">
+                        Combine Slope: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['combine-type']">0</span>
+                    </div>
                 </div>
-            </div>
-
-        </div>
-
-        <!-- Sub-System Dashboard Indicators Grid (Overall Menu Info) -->
-        <div class="space-y-4 pt-4">
-            <h3 class="font-extrabold text-gray-800 text-lg uppercase tracking-wider border-b border-gray-150 pb-2">Sub-System Overview Dashboards</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                
-                <!-- Priority Widget -->
-                <div class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs bg-red-50 text-red-700 font-bold px-2 py-0.5 rounded">Risk Prioritization</span>
-                        <img src="components/icons/management-ico.svg" class="h-5 w-5" alt="Priority">
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400 font-semibold uppercase">Max Risk Rank</p>
-                        <h4 class="text-lg font-black text-gray-800" x-text="stats.highestRiskSlope ? stats.highestRiskSlope.slope_name + ' (RS: ' + parseFloat(stats.highestRiskSlope.ranking.RS).toFixed(0) + ')' : 'No High Risk'">-</h4>
-                    </div>
-                    <div class="text-xs text-gray-500 font-medium border-t border-gray-100 pt-2.5 flex justify-between items-center">
-                        <span>High Risk Assets:</span>
-                        <span class="font-bold text-red-600" x-text="stats.highRiskCount + ' Slopes'"></span>
-                    </div>
-                    <a href="priority.html" class="block w-full text-center bg-stone-50 hover:bg-stone-100 text-gray-700 font-bold py-1.5 rounded-xl text-[10px] transition">Manage Priorities →</a>
-                </div>
-
-                <!-- Inspection Widget -->
-                <div class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded">Inspection & Maintenance</span>
-                        <img src="components/icons/inspection-ico.svg" class="h-5 w-5" alt="Inspection">
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400 font-semibold uppercase">Schedules Due</p>
-                        <h4 class="text-lg font-black text-gray-800" x-text="stats.totalInspections ? stats.totalInspections + ' Inspections Active' : '0 Scheduled'">0 Scheduled</h4>
-                    </div>
-                    <div class="text-xs text-gray-500 font-medium border-t border-gray-100 pt-2.5 flex justify-between items-center">
-                        <span>Maintenance Logs:</span>
-                        <span class="font-bold text-blue-600" x-text="stats.totalMaintenances + ' Completed'"></span>
-                    </div>
-                    <a href="inspection.html" class="block w-full text-center bg-stone-50 hover:bg-stone-100 text-gray-700 font-bold py-1.5 rounded-xl text-[10px] transition">Open Schedules →</a>
-                </div>
-
-                <!-- Preservation Widget -->
-                <div class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs bg-lime-50 text-lime-700 font-bold px-2 py-0.5 rounded">Preservation Works</span>
-                        <img src="components/icons/preservation-ico.svg" class="h-5 w-5" alt="Preservation">
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400 font-semibold uppercase">Improvement Logs</p>
-                        <h4 class="text-lg font-black text-gray-800" x-text="stats.totalPreservations ? stats.totalPreservations + ' Slope Upgrades' : '0 Logged'">0 Upgrades</h4>
-                    </div>
-                    <div class="text-xs text-gray-500 font-medium border-t border-gray-100 pt-2.5 flex justify-between items-center">
-                        <span>Landslide Repairs:</span>
-                        <span class="font-bold text-lime-600">Active</span>
-                    </div>
-                    <a href="preservation.html" class="block w-full text-center bg-stone-50 hover:bg-stone-100 text-gray-700 font-bold py-1.5 rounded-xl text-[10px] transition">Review Works →</a>
-                </div>
-
-                <!-- Mitigation Widget -->
-                <div class="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded">Mitigation Budget</span>
-                        <img src="components/icons/mitigation-ico.svg" class="h-5 w-5" alt="Mitigation">
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400 font-semibold uppercase">Forecast Cost</p>
-                        <h4 class="text-lg font-black text-gray-800" x-text="'Rp ' + (stats.totalMitigationCost ? (stats.totalMitigationCost / 1000000000).toFixed(2) + ' B' : '0 B')">-</h4>
-                    </div>
-                    <div class="text-xs text-gray-500 font-medium border-t border-gray-100 pt-2.5 flex justify-between items-center">
-                        <span>Planned Solutions:</span>
-                        <span class="font-bold text-amber-600" x-text="stats.totalMitigations + ' Proposals'"></span>
-                    </div>
-                    <a href="mitigation.html" class="block w-full text-center bg-stone-50 hover:bg-stone-100 text-gray-700 font-bold py-1.5 rounded-xl text-[10px] transition">Calculate Costs →</a>
-                </div>
-
             </div>
         </div>
 
-        <!-- 6 Main Module Cards Grid (Launchpad) -->
-        <div class="space-y-4 pt-4">
-            <h3 class="font-extrabold text-gray-800 text-lg uppercase tracking-wider border-b border-gray-150 pb-2">Module Launchpad</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                
-                <!-- Card 1: SLOPE INVENTORY -->
-                <a href="inventory.html" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between group">
-                    <div class="flex items-start space-x-4">
-                        <div class="rounded-xl bg-lime-50 p-3 group-hover:scale-105 transition duration-200">
-                            <img src="components/icons/inventory-ico.svg" class="h-10 w-10" alt="Inventory">
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 uppercase group-hover:text-lime-600 transition">Slope Inventory</h3>
-                            <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                                Complete database of all managed slopes with essential data for monitoring.
-                            </p>
-                        </div>
-                    </div>
-                </a>
+        <!-- Core Philosophy — horizontal split banner -->
+        <div class="rounded-3xl overflow-hidden shadow-lg border border-lime-900/10 flex flex-col md:flex-row min-h-[200px] md:min-h-[220px]">
+            <div class="relative flex-1 bg-lime-950 px-7 py-7 md:px-10 md:py-8 flex flex-col justify-center">
+                <div class="absolute top-3 left-5 text-lime-500/15 text-7xl font-serif leading-none select-none pointer-events-none">"</div>
+                <span class="relative z-10 inline-flex self-start bg-lime-600/90 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Core Philosophy</span>
+                <blockquote class="relative z-10 mt-4 text-[15px] md:text-lg font-bold italic text-white/95 leading-relaxed max-w-2xl">
+                    Engineering is the professional art of applying science to the optimum conversion of natural resources to the benefit of man.
+                </blockquote>
+                <cite class="relative z-10 mt-4 text-sm font-semibold text-lime-400 not-italic">— Ralph J. Smith</cite>
+                <p class="relative z-10 mt-2 text-[10px] text-lime-500/70 font-medium">Field engineering at the heart of slope safety</p>
+            </div>
+            <div class="relative md:w-[42%] lg:w-[38%] min-h-[160px] md:min-h-0 shrink-0 bg-cover bg-no-repeat" style="background-image: url('components/bg2.webp'); background-position: right center;">
+                <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-transparent via-transparent to-lime-950/25 md:to-lime-950/40"></div>
+            </div>
+        </div>
 
-                <!-- Card 2: SLOPE PRIORITY -->
-                <a href="priority.html" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between group">
-                    <div class="flex items-start space-x-4">
-                        <div class="rounded-xl bg-lime-50 p-3 group-hover:scale-105 transition duration-200">
-                            <img src="components/icons/management-ico.svg" class="h-10 w-10" alt="Priority">
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 uppercase group-hover:text-lime-600 transition">Slope Priority</h3>
-                            <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                                Helps prioritize slope handling based on risk and urgency for effective resource use.
-                            </p>
-                        </div>
-                    </div>
+        <!-- Upcoming Inspection Schedule -->
+        <div id="schedule-section" class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-3 flex-wrap gap-3">
+                <div>
+                    <h4 class="font-extrabold text-gray-800 text-base">Upcoming Inspection Schedule</h4>
+                    <p class="text-xs text-gray-400 font-semibold">Click KPI cards or stratification bars to filter · nearest inspection timelines</p>
+                </div>
+                <a href="inspection.html" class="text-xs bg-blue-100 text-blue-800 font-bold px-3 py-1.5 rounded-full hover:bg-blue-200 transition">
+                    View All Schedules →
                 </a>
+            </div>
 
-                <!-- Card 3: INSPECTION -->
-                <a href="inspection.html" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between group">
-                    <div class="flex items-start space-x-4">
-                        <div class="rounded-xl bg-lime-50 p-3 group-hover:scale-105 transition duration-200">
-                            <img src="components/icons/inspection-ico.svg" class="h-10 w-10" alt="Inspection">
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 uppercase group-hover:text-lime-600 transition">Inspection</h3>
-                            <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                                Integrated inspection tracking and real-time reporting for early issue detection.
-                            </p>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 4: SLOPE PRESERVATION -->
-                <a href="preservation.html" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between group">
-                    <div class="flex items-start space-x-4">
-                        <div class="rounded-xl bg-lime-50 p-3 group-hover:scale-105 transition duration-200">
-                            <img src="components/icons/preservation-ico.svg" class="h-10 w-10" alt="Preservation">
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 uppercase group-hover:text-lime-600 transition">Slope Preservation</h3>
-                            <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                                Strategic preservation actions and maintenance planning to ensure slope stability.
-                            </p>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 5: MITIGATION CALCULATE -->
-                <a href="mitigation.html" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between group">
-                    <div class="flex items-start space-x-4">
-                        <div class="rounded-xl bg-lime-50 p-3 group-hover:scale-105 transition duration-200">
-                            <img src="components/icons/mitigation-ico.svg" class="h-10 w-10" alt="Mitigation">
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 uppercase group-hover:text-lime-600 transition">Mitigation Calculate</h3>
-                            <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                                Provides tailored mitigation solutions based on data analysis to reduce risks.
-                            </p>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 6: SLOPE INFORMATION -->
-                <a href="index.html" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between group">
-                    <div class="flex items-start space-x-4">
-                        <div class="rounded-xl bg-lime-50 p-3 group-hover:scale-105 transition duration-200">
-                            <img src="components/icons/info-ico.svg" class="h-10 w-10" alt="Info">
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-900 uppercase group-hover:text-lime-600 transition">Slope Information</h3>
-                            <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                                Visualizing slope locations, inspection statuses, and mitigation actions.
-                            </p>
-                        </div>
-                    </div>
-                </a>
-
+            <div class="overflow-x-auto border border-gray-100 rounded-2xl">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-600 uppercase bg-stone-50 border-b border-gray-100 font-bold">
+                        <tr>
+                            <th scope="col" class="px-5 py-3">Slope</th>
+                            <th scope="col" class="px-5 py-3">Category</th>
+                            <th scope="col" class="px-5 py-3">Next Engineer Inspection</th>
+                            <th scope="col" class="px-5 py-3">Next Maintenance</th>
+                            <th scope="col" class="px-5 py-3 text-right">RS Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="item in filteredSchedule()" :key="item.slug">
+                            <tr class="border-b border-gray-100 hover:bg-stone-50/70 transition cursor-pointer" @click="window.location.href='detail.html?slug=' + item.slug">
+                                <td class="px-5 py-3.5">
+                                    <div class="font-extrabold text-gray-800" x-text="item.slope_name"></div>
+                                    <div class="text-[10px] text-gray-400 font-semibold truncate max-w-xs" x-text="item.location"></div>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <span class="inline-block px-2 py-0.5 text-[10px] font-bold bg-stone-100 text-stone-700 rounded-full" x-text="item.consequence_to_life.replace('category-', 'Cat. ')"></span>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <div class="font-bold text-gray-700 text-xs" x-text="formatDate(item.engineer_inspection)"></div>
+                                    <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(item.engineer_inspection)" x-text="daysRemaining(item.engineer_inspection)"></div>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <div class="font-bold text-gray-700 text-xs" x-text="formatDate(item.maintenance_inspection)"></div>
+                                    <div class="text-[10px] font-semibold mt-0.5" :class="daysRemainingClass(item.maintenance_inspection)" x-text="daysRemaining(item.maintenance_inspection)"></div>
+                                </td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <span class="font-black text-xs"
+                                          :class="item.rs >= 1000 ? 'text-red-600' : (item.rs >= 100 ? 'text-amber-600' : 'text-emerald-600')"
+                                          x-text="item.rs.toFixed(2)"></span>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="filteredSchedule().length === 0">
+                            <td colspan="5" class="text-center py-8 text-gray-400 italic">No slopes match this risk filter.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
     </div>
 
-    <!-- Loading Screen Placeholder -->
+    <!-- Loading -->
     <div class="flex items-center justify-center min-h-screen bg-stone-50" x-show="loading">
         <div class="text-center space-y-3">
             <div class="w-12 h-12 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p class="text-gray-500 font-semibold text-sm">Compiling system telemetry telemetry...</p>
+            <p class="text-gray-500 font-semibold text-sm">Compiling system telemetry...</p>
         </div>
     </div>
 
-    <!-- Flowbite JS Bundle -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 
     <script>
@@ -526,7 +449,7 @@
                 userName: 'Admin User',
                 loading: true,
                 stats: {},
-                map: null,
+                scheduleSlopes: [],
                 selectedRiskFilter: 'all',
 
                 init() {
@@ -537,21 +460,26 @@
                     }
                     const user = JSON.parse(session);
                     this.userName = user.name;
-                    
                     this.fetchTelemetry();
                 },
 
                 fetchTelemetry() {
-                    fetch('/api/dashboard/stats')
-                        .then(res => res.json())
-                        .then(data => {
+                    Promise.all([
+                        fetch('/api/dashboard/stats').then(res => res.json()),
+                        fetch('/api/slopes?limit=500').then(res => res.json())
+                    ])
+                        .then(([data, slopesRes]) => {
                             this.stats = data;
+                            this.scheduleSlopes = (slopesRes.slopes || []).map(s => ({
+                                slope_name: s.slope_name,
+                                slug: s.slug,
+                                location: s.location,
+                                engineer_inspection: s.engineer_inspection,
+                                maintenance_inspection: s.maintenance_inspection,
+                                consequence_to_life: (s.rating && s.rating.consequence_to_life) || 'category-2',
+                                rs: s.ranking && s.ranking.RS !== '-' ? parseFloat(s.ranking.RS) : 0
+                            })).sort((a, b) => new Date(a.engineer_inspection) - new Date(b.engineer_inspection));
                             this.loading = false;
-                            
-                            // Initialize interactive map next tick
-                            setTimeout(() => {
-                                this.initMap();
-                            }, 100);
                         })
                         .catch(err => {
                             console.error('Telemetry fetch error:', err);
@@ -559,84 +487,68 @@
                         });
                 },
 
-                initMap() {
-                    // Central coordinate of toll road section (Bawen/Salatiga)
-                    this.map = L.map('dashboardMap').setView([-7.23, 110.46], 11);
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(this.map);
-
-                    // Add color-coded markers for each slope
-                    if (this.stats.mapMarkers && this.stats.mapMarkers.length > 0) {
-                        this.stats.mapMarkers.forEach(m => {
-                            const lat = parseFloat(m.latitude);
-                            const lng = parseFloat(m.longtitude);
-
-                            if (!isNaN(lat) && !isNaN(lng)) {
-                                // Determine icon class based on RS score
-                                let markerClass = 'pulse-pin-green';
-                                if (m.rs >= 1000) {
-                                    markerClass = 'pulse-pin-red';
-                                } else if (m.rs >= 100) {
-                                    markerClass = 'pulse-pin-amber';
-                                }
-
-                                const customIcon = L.divIcon({
-                                    className: markerClass,
-                                    iconSize: [14, 14],
-                                    popupAnchor: [0, -5]
-                                });
-
-                                const popupHtml = `
-                                    <div class="text-gray-900 font-sans p-1">
-                                        <p class="font-extrabold text-sm text-lime-700">${m.slope_name}</p>
-                                        <p class="text-xs font-semibold text-gray-500">${m.slope_type.replace('-type', '').toUpperCase()} Slope</p>
-                                        <p class="text-[10px] text-gray-400 mt-1">${m.location}</p>
-                                        <div class="flex justify-between items-center mt-2.5 border-t border-gray-100 pt-1.5">
-                                            <span class="text-[10px] font-bold text-gray-500">RS Score:</span>
-                                            <span class="font-black text-xs text-lime-600">${parseFloat(m.rs).toFixed(2)}</span>
-                                        </div>
-                                        <a href="detail.html?slug=${m.slug}" class="block mt-2 text-center bg-lime-600 hover:bg-lime-750 text-white font-bold text-[10px] py-1 rounded transition">Open Details</a>
-                                    </div>
-                                `;
-
-                                L.marker([lat, lng], { icon: customIcon })
-                                    .addTo(this.map)
-                                    .bindPopup(popupHtml);
-                            }
-                        });
+                setRiskFilter(level) {
+                    this.selectedRiskFilter = this.selectedRiskFilter === level && level !== 'all' ? 'all' : level;
+                    if (level !== 'all') {
+                        setTimeout(() => {
+                            document.getElementById('schedule-section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }, 100);
                     }
-                    // Auto-frame all markers on load
-                    this.focusMapOnRisk('all');
                 },
 
-                focusMapOnRisk(level) {
-                    this.selectedRiskFilter = level;
-                    if (!this.map || !this.stats.mapMarkers) return;
-                    
-                    const coords = [];
-                    this.stats.mapMarkers.forEach(m => {
-                        const lat = parseFloat(m.latitude);
-                        const lng = parseFloat(m.longtitude);
-                        if (!isNaN(lat) && !isNaN(lng)) {
-                            if (level === 'all') {
-                                coords.push([lat, lng]);
-                            } else if (level === 'high' && m.rs >= 1000) {
-                                coords.push([lat, lng]);
-                            } else if (level === 'medium' && m.rs >= 100 && m.rs < 1000) {
-                                coords.push([lat, lng]);
-                            } else if (level === 'low' && m.rs < 100) {
-                                coords.push([lat, lng]);
-                            }
-                        }
-                    });
-
-                    if (coords.length > 0) {
-                        const bounds = L.latLngBounds(coords);
-                        this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+                filteredSchedule() {
+                    let list = this.scheduleSlopes;
+                    if (this.selectedRiskFilter === 'high') {
+                        list = list.filter(i => i.rs >= 1000);
+                    } else if (this.selectedRiskFilter === 'medium') {
+                        list = list.filter(i => i.rs >= 100 && i.rs < 1000);
+                    } else if (this.selectedRiskFilter === 'low') {
+                        list = list.filter(i => i.rs < 100);
                     }
+                    return list.slice(0, this.selectedRiskFilter === 'all' ? 8 : 50);
+                },
+
+                riskPercent(level) {
+                    const total = this.stats.totalSlopes || 1;
+                    if (level === 'high') return ((this.stats.highRiskCount / total) * 100).toFixed(1);
+                    if (level === 'medium') return ((this.stats.medRiskCount / total) * 100).toFixed(1);
+                    if (level === 'low') return ((this.stats.lowRiskCount / total) * 100).toFixed(1);
+                    return '100.0';
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return '—';
+                    return new Date(dateStr).toLocaleDateString('en-GB', {
+                        day: '2-digit', month: 'short', year: 'numeric'
+                    });
+                },
+
+                daysRemaining(dateStr) {
+                    if (!dateStr) return '';
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const target = new Date(dateStr);
+                    target.setHours(0, 0, 0, 0);
+                    const days = Math.round((target - today) / (1000 * 60 * 60 * 24));
+                    if (days < 0) {
+                        const overdue = Math.abs(days);
+                        return overdue === 1 ? '1 day overdue' : `${overdue} days overdue`;
+                    }
+                    if (days === 0) return 'Today';
+                    if (days === 1) return '1 day left';
+                    return `${days} days left`;
+                },
+
+                daysRemainingClass(dateStr) {
+                    if (!dateStr) return 'text-gray-400';
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const target = new Date(dateStr);
+                    target.setHours(0, 0, 0, 0);
+                    const days = Math.round((target - today) / (1000 * 60 * 60 * 24));
+                    if (days < 0) return 'text-red-500';
+                    if (days <= 30) return 'text-amber-600';
+                    return 'text-gray-400';
                 },
 
                 logout() {
