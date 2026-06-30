@@ -2,7 +2,7 @@
 
 Selamat datang di direktori dokumentasi **Slope Risk Management System (SRMS)**. Dokumen ini disusun khusus dalam Bahasa Indonesia untuk membantu pengguna awam, pemilik proyek, maupun tim pengembang (termasuk AI agent seperti Antigravity, Kiro, dll.) agar dapat langsung memahami proyek ini dan melanjutkan pengembangannya dengan cepat.
 
-Dokumentasi ini dibagi menjadi 4 bagian utama yang saling melengkapi:
+Dokumentasi ini dibagi menjadi 5 bagian utama yang saling melengkapi:
 
 ---
 
@@ -33,6 +33,12 @@ Dokumentasi ini dibagi menjadi 4 bagian utama yang saling melengkapi:
 *   Struktur folder proyek prototype.
 *   Spesifikasi REST API Endpoint untuk pengembang masa depan.
 *   Panduan melanjutkan proyek menggunakan AI Coding Assistant.
+
+### 5. [Panduan Konvensi Commit Git (5_panduan_commit_git.md)](./5_panduan_commit_git.md)
+*   Format pesan commit standar (Conventional Commits).
+*   Jenis commit: `feat`, `fix`, `refactor`, `style`, `docs`, `chore`, dan lainnya.
+*   Scope yang disarankan untuk modul SRMS.
+*   Contoh commit yang baik dan yang perlu dihindari.
 
 ---
 
