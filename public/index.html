@@ -299,66 +299,6 @@
             </div>
         </div>
 
-        <!-- Risk summary + asset types -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-4" :class="selectedRiskFilter !== 'all' ? 'ring-1 ring-lime-200' : ''">
-                <div class="flex justify-between items-center">
-                    <h4 class="font-bold text-gray-800 text-sm">Slope Hazard Stratification</h4>
-                    <span x-show="selectedRiskFilter !== 'all'" class="text-[10px] font-bold text-lime-600 bg-lime-50 px-2 py-0.5 rounded-full uppercase" x-text="'Filtered: ' + selectedRiskFilter"></span>
-                </div>
-                <div class="space-y-3.5">
-                    <div @click="setRiskFilter('high')" class="rounded-xl p-2 -mx-2 transition cursor-pointer" :class="selectedRiskFilter === 'high' ? 'bg-red-50 ring-1 ring-red-200' : (selectedRiskFilter === 'all' ? 'hover:bg-stone-50' : 'opacity-40')">
-                        <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                            <span>High Risk (RS ≥ 1,000)</span>
-                            <span x-text="stats.highRiskCount + ' Slopes'"></span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2.5">
-                            <div class="bg-red-500 h-2.5 rounded-full transition-all duration-500" :class="selectedRiskFilter === 'high' || selectedRiskFilter === 'all' ? '' : 'opacity-50'" :style="'width: ' + ((stats.highRiskCount / stats.totalSlopes) * 100) + '%'"></div>
-                        </div>
-                    </div>
-                    <div @click="setRiskFilter('medium')" class="rounded-xl p-2 -mx-2 transition cursor-pointer" :class="selectedRiskFilter === 'medium' ? 'bg-amber-50 ring-1 ring-amber-200' : (selectedRiskFilter === 'all' ? 'hover:bg-stone-50' : 'opacity-40')">
-                        <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                            <span>Medium Risk (100 - 999)</span>
-                            <span x-text="stats.medRiskCount + ' Slopes'"></span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2.5">
-                            <div class="bg-amber-500 h-2.5 rounded-full transition-all duration-500" :class="selectedRiskFilter === 'medium' || selectedRiskFilter === 'all' ? '' : 'opacity-50'" :style="'width: ' + ((stats.medRiskCount / stats.totalSlopes) * 100) + '%'"></div>
-                        </div>
-                    </div>
-                    <div @click="setRiskFilter('low')" class="rounded-xl p-2 -mx-2 transition cursor-pointer" :class="selectedRiskFilter === 'low' ? 'bg-emerald-50 ring-1 ring-emerald-200' : (selectedRiskFilter === 'all' ? 'hover:bg-stone-50' : 'opacity-40')">
-                        <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-                            <span>Low Risk (RS &lt; 100)</span>
-                            <span x-text="stats.lowRiskCount + ' Slopes'"></span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2.5">
-                            <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" :class="selectedRiskFilter === 'low' || selectedRiskFilter === 'all' ? '' : 'opacity-50'" :style="'width: ' + ((stats.lowRiskCount / stats.totalSlopes) * 100) + '%'"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-3">
-                <h4 class="font-bold text-gray-800 text-sm">Asset Type Distributions</h4>
-                <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-gray-600">
-                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                        Cut Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['cut-type']">0</span>
-                    </div>
-                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                        Rock Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['rock-type']">0</span>
-                    </div>
-                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                        Fill Slopes: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['fill-type']">0</span>
-                    </div>
-                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100">
-                        Retaining Wall: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['retaining-type']">0</span>
-                    </div>
-                    <div class="bg-stone-50 p-2.5 rounded-xl border border-gray-100 col-span-2">
-                        Combine Slope: <span class="font-bold text-gray-800" x-text="stats.typeCounts?.['combine-type']">0</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Core Philosophy — horizontal split banner -->
         <div class="rounded-3xl overflow-hidden shadow-lg border border-lime-900/10 flex flex-col md:flex-row min-h-[200px] md:min-h-[220px]">
             <div class="relative flex-1 bg-lime-950 px-7 py-7 md:px-10 md:py-8 flex flex-col justify-center">
@@ -380,7 +320,7 @@
             <div class="flex justify-between items-center border-b border-gray-100 pb-3 flex-wrap gap-3">
                 <div>
                     <h4 class="font-extrabold text-gray-800 text-base">Upcoming Inspection Schedule</h4>
-                    <p class="text-xs text-gray-400 font-semibold">Click KPI cards or stratification bars to filter · nearest inspection timelines</p>
+                    <p class="text-xs text-gray-400 font-semibold">Click KPI cards to filter · nearest inspection timelines</p>
                 </div>
                 <a href="inspection.html" class="text-xs bg-blue-100 text-blue-800 font-bold px-3 py-1.5 rounded-full hover:bg-blue-200 transition">
                     View All Schedules →
